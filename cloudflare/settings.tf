@@ -39,3 +39,24 @@
 #   enable_js  = true
 #   fight_mode = true
 # }
+
+
+resource "cloudflare_zone_settings_override" "soubilabs_https" {
+  zone_id = var.soubilabs_zone_id
+
+  settings {
+    ssl                      = "strict"
+
+    minify {
+      css  = "on"
+      js   = "on"
+      html = "on"
+    }
+
+    security_header {
+      enabled            = true
+      include_subdomains = true
+      max_age            = 31536000
+    }
+  }
+}
