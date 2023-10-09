@@ -6,18 +6,18 @@ resource "cloudflare_record" "soubilabs_blog" {
   proxied = false
 }
 
-resource "cloudflare_record" "soubilabs_site" {
+resource "cloudflare_record" "soubilabs_www" {
   zone_id = var.soubilabs_zone_id
   name    = "www"
   value   = "soubinan.github.io"
   type    = "CNAME"
-  proxied = false
+  proxied = true
 }
 
-resource "cloudflare_record" "soubilabs_site" {
+resource "cloudflare_record" "soubilabs_apex" {
   zone_id = var.soubilabs_zone_id
   name    = "@"
   value   = "soubinan.github.io"
-  type    = "A"
-  proxied = false
+  type    = "CNAME"
+  proxied = true
 }
