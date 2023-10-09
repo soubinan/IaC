@@ -30,26 +30,26 @@ resource "cloudflare_record" "soubilabs_dmarc" {
 }
 
 resource "cloudflare_record" "soubilabs_mx_1" {
-  zone_id = var.soubilabs_zone_id
-  name    = "@"
-  value   = "route1.mx.cloudflare.net"
-  type    = "MX"
+  zone_id  = var.soubilabs_zone_id
+  name     = "@"
+  value    = "route1.mx.cloudflare.net"
+  type     = "MX"
   priority = 5
 }
 
 resource "cloudflare_record" "soubilabs_mx_2" {
-  zone_id = var.soubilabs_zone_id
-  name    = "@"
-  value   = "route2.mx.cloudflare.net"
-  type    = "MX"
+  zone_id  = var.soubilabs_zone_id
+  name     = "@"
+  value    = "route2.mx.cloudflare.net"
+  type     = "MX"
   priority = 11
 }
 
 resource "cloudflare_record" "soubilabs_mx_3" {
-  zone_id = var.soubilabs_zone_id
-  name    = "@"
-  value   = "route3.mx.cloudflare.net"
-  type    = "MX"
+  zone_id  = var.soubilabs_zone_id
+  name     = "@"
+  value    = "route3.mx.cloudflare.net"
+  type     = "MX"
   priority = 48
 }
 
@@ -57,5 +57,12 @@ resource "cloudflare_record" "soubilabs_spf" {
   zone_id = var.soubilabs_zone_id
   name    = "@"
   value   = "v=spf1 include:_spf.mx.cloudflare.net ~all"
+  type    = "TXT"
+}
+
+resource "cloudflare_record" "soubilabs_dkim" {
+  zone_id = var.soubilabs_zone_id
+  name    = "@"
+  value   = "v=DKIM1;t=s;p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDCvAW6v9kbrGXTGsgzIXvs0IHC5ZjZYpNjCmOB2LueZ3r/DsXC1LYz8w1f0rrO6Ln3fe/8zPYcV0M6NMAhJqkuvaSJrsFjcz7OJVWJKQhfY8G1bYRrD6Xau1cDQyLSnUxCWrFwH6tiZumdDv6I28NJymR17+xdwSgV3YB8LVm5AwIDAQAB"
   type    = "TXT"
 }
