@@ -2,7 +2,6 @@ resource "cloudflare_zone_settings_override" "soubilabs_zone_settings" {
   zone_id = var.soubilabs_zone_id
 
   settings {
-    waf                      = "on"
     always_use_https         = "on"
     brotli                   = "on"
     tls_1_3                  = "on"
