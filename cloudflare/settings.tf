@@ -1,11 +1,3 @@
-resource "cloudflare_record" "soubilabs_blog" {
-  zone_id = var.soubilabs_zone_id
-  name    = "blog"
-  value   = "hashnode.network"
-  type    = "CNAME"
-  proxied = false
-}
-
 resource "cloudflare_zone_settings_override" "soubilabs_https" {
   zone_id = var.soubilabs_zone_id
   settings {
@@ -15,6 +7,17 @@ resource "cloudflare_zone_settings_override" "soubilabs_https" {
     automatic_https_rewrites = "on"
     ssl                      = "strict"
     waf                      = "on"
+
+    minify {
+      css  = "on"
+      js   = "on"
+      html = "on"
+    }
+
+    security_header {
+      enabled = true
+      include_subdomains = true
+    }
   }
 }
 
