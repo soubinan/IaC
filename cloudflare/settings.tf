@@ -35,6 +35,10 @@ resource "cloudflare_zone_settings_override" "soubilabs_zone_settings" {
   }
 }
 
+resource "cloudflare_zone_dnssec" "soubilabs" {
+  zone_id = var.soubilabs_zone_id
+}
+
 resource "cloudflare_bot_management" "soubilabs_anti_bot" {
   zone_id    = var.soubilabs_zone_id
   enable_js  = true
