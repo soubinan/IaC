@@ -66,3 +66,10 @@ resource "cloudflare_record" "soubilabs_dkim" {
   value   = "v=DKIM1;t=s;p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDCvAW6v9kbrGXTGsgzIXvs0IHC5ZjZYpNjCmOB2LueZ3r/DsXC1LYz8w1f0rrO6Ln3fe/8zPYcV0M6NMAhJqkuvaSJrsFjcz7OJVWJKQhfY8G1bYRrD6Xau1cDQyLSnUxCWrFwH6tiZumdDv6I28NJymR17+xdwSgV3YB8LVm5AwIDAQAB"
   type    = "TXT"
 }
+
+resource "cloudflare_record" "soubilabs_mtasts" {
+  zone_id = var.soubilabs_zone_id
+  name    = "mta-sts"
+  value   = "v=STSv1; id=169688529676Z;"
+  type    = "TXT"
+}
