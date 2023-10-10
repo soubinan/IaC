@@ -1,11 +1,11 @@
 const stsPolicies = {
     "mta-sts.soubilabs.xyz":
         `version: STSv1
-  mode: testing
-  mx: route1.mx.cloudflare.net
-  mx: route2.mx.cloudflare.net
-  mx: route3.mx.cloudflare.net
-  max_age: 259200`
+mode: testing
+mx: route1.mx.cloudflare.net
+mx: route2.mx.cloudflare.net
+mx: route3.mx.cloudflare.net
+max_age: 259200`
 }
 
 const respHeaders = {
