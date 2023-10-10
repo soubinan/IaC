@@ -31,5 +31,7 @@ async function handleRequest(request) {
             reqUrl.pathname = "/.well-known/mta-sts.txt"
             return Response.redirect(reqUrl, 301)
         }
+    } else {
+        return new Response(`Not found:\n${reqUrl.url} is not an existing resource\n`, { status: 404, headers: respHeaders })
     }
 }
