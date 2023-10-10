@@ -70,6 +70,6 @@ resource "cloudflare_record" "soubilabs_dkim" {
 resource "cloudflare_record" "soubilabs_mtasts" {
   zone_id = var.soubilabs_zone_id
   name    = "_mta-sts"
-  value   = "v=STSv1; id=169688529676Z;"
+  value   = "v=STSv1; id=169691518796Z;"
   type    = "TXT"
 }
