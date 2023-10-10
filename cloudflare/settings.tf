@@ -44,3 +44,22 @@ resource "cloudflare_bot_management" "soubilabs_anti_bot" {
   enable_js  = true
   fight_mode = true
 }
+
+resource "cloudflare_worker_domain" "mta_sts" {
+  account_id = var.soubilabs_account_id
+  zone_id    = var.soubilabs_zone_id
+  hostname   = "mta-sts.${var.soubilabs_domain}"
+  service    = "mta-sts"
+}
+
+resource "cloudflare_worker_script" "mta_sts_script" {
+  account_id = var.soubilabs_account_id
+  name       = "mta-sts"
+  content    = file("mta-sts.js")
+
+  service_binding {
+    name        = "mta-sts_service"
+    service     = cloudflare_worker_domain.mta_sts.service
+    environment = "production"
+  }
+}
