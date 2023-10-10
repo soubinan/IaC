@@ -32,6 +32,6 @@ async function handleRequest(request) {
             return Response.redirect(reqUrl, 301)
         }
     } else {
-        return new Response(`Not found:\n${reqUrl.url} is not an existing resource\n`, { status: 404, headers: respHeaders })
+        return new Response(`Not found:\nThe requested resource not exist\n`, { status: 404, headers: respHeaders })
     }
 }
