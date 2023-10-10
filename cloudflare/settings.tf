@@ -55,7 +55,7 @@ resource "cloudflare_worker_domain" "mta_sts" {
 resource "cloudflare_worker_script" "mta_sts_script" {
   account_id = var.soubilabs_account_id
   name       = "mta-sts"
-  content    = file("./mta-sts.js")
+  content    = file("${path.module}/mta-sts.js")
 
   service_binding {
     name        = "mta-sts_service"
