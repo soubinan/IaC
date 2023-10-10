@@ -3,6 +3,10 @@ variable "account_id" {
   default = "f2dda9cf92c02eb24ced3b63332b6055"
 }
 
+variable "workers_subdomain" {
+  default = "soubinan.workers.dev"
+}
+
 variable "soubilabs_domain" {
   default = "soubinan.xyz"
 }

@@ -45,17 +45,17 @@ resource "cloudflare_bot_management" "soubilabs_anti_bot" {
   fight_mode = true
 }
 
+resource "cloudflare_worker_script" "mta_sts_script" {
+  account_id = var.account_id
+  name       = "mta_sts_script"
+  content    = file("${path.module}/mta-sts.js")
+}
+
 resource "cloudflare_worker_domain" "soubilabs_mta_sts" {
   account_id = var.account_id
   zone_id    = var.soubilabs_zone_id
-  hostname   = "mta-sts.${var.soubilabs_domain}"
-  service    = "mta_sts"
-}
-
-resource "cloudflare_worker_script" "mta_sts_script" {
-  account_id = var.account_id
-  name       = "mta_sts_script2"
-  content    = file("${path.module}/mta-sts.js")
+  hostname   = "mta-sts.${var.workers_subdomain}"
+  service    = cloudflare_worker_script.mta_sts_script.name
 }
 
 resource "cloudflare_worker_route" "soubilabs_mta_sts_route" {
