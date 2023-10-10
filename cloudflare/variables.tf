@@ -8,7 +8,7 @@ variable "workers_subdomain" {
 }
 
 variable "soubilabs_domain" {
-  default = "soubinan.xyz"
+  default = "soubilabs.xyz"
 }
 
 variable "soubilabs_zone_id" {

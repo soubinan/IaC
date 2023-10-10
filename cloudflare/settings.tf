@@ -54,7 +54,7 @@ resource "cloudflare_worker_script" "mta_sts_script" {
 resource "cloudflare_worker_domain" "soubilabs_mta_sts" {
   account_id = var.account_id
   zone_id    = var.soubilabs_zone_id
-  hostname   = "mta-sts.${var.workers_subdomain}"
+  hostname   = "mta-sts.${var.soubilabs_domain}"
   service    = cloudflare_worker_script.mta_sts_script.name
 }
 
