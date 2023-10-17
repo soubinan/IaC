@@ -73,3 +73,10 @@ resource "cloudflare_record" "soubilabs_mtasts" {
   value   = "v=STSv1; id=169691518796Z;"
   type    = "TXT"
 }
+
+resource "cloudflare_record" "soubilabs_tlsrpt" {
+  zone_id = var.soubilabs_zone_id
+  name    = "_smtp._tls"
+  value   = "v=TLSRPTv1; rua=mailto:soubinan@gmail.com;"
+  type    = "TXT"
+}
