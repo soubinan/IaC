@@ -80,3 +80,19 @@ resource "cloudflare_record" "soubilabs_tlsrpt" {
   value   = "v=TLSRPTv1; rua=mailto:soubinan@gmail.com;"
   type    = "TXT"
 }
+
+########## Brevo email sender
+
+resource "cloudflare_record" "soubilabs_brevocode" {
+  zone_id = var.soubilabs_zone_id
+  name    = "@"
+  value   = "brevo-code:7d2cf8515804438cd0a418aca7189afa"
+  type    = "TXT"
+}
+
+resource "cloudflare_record" "soubilabs_brevodkim" {
+  zone_id = var.soubilabs_zone_id
+  name    = "mail._domainkey"
+  value   = "k=rsa;p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDeMVIzrCa3T14JsNY0IRv5/2V1/v2itlviLQBwXsa7shBD6TrBkswsFUToPyMRWC9tbR/5ey0nRBH0ZVxp+lsmTxid2Y2z+FApQ6ra2VsXfbJP3HE6wAO0YTVEJt1TmeczhEd2Jiz/fcabIISgXEdSpTYJhb0ct0VJRxcg4c8c7wIDAQAB"
+  type    = "TXT"
+}
