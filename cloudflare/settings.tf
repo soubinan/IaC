@@ -44,3 +44,24 @@ resource "cloudflare_bot_management" "soubilabs_anti_bot" {
   enable_js  = true
   fight_mode = true
 }
+
+resource "cloudflare_ruleset" "ddos" {
+  zone_id     = var.soubilabs_zone_id
+  name        = "ddos_rulset"
+  description = "DDOS attack shield"
+  kind        = "zone"
+  phase       = "ddos_l7"
+
+  rules {
+    action = "managed_challenge"
+    action_parameters {
+      overrides {
+        sensitivity_level = "default"
+      }
+    }
+
+    expression  = "(http.host eq \"${var.soubilabs_domain}\")"
+    description = "Apply on all traffic going to soubilabs.xyz"
+    enabled     = true
+  }
+}

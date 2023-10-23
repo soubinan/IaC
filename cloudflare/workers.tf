@@ -12,7 +12,7 @@ resource "cloudflare_worker_domain" "soubilabs_mta_sts" {
 }
 
 resource "cloudflare_worker_route" "soubilabs_mta_sts_route" {
-  zone_id    = var.soubilabs_zone_id
+  zone_id     = var.soubilabs_zone_id
   pattern     = "mta-sts.${var.soubilabs_domain}/*"
   script_name = cloudflare_worker_script.mta_sts_script.name
 
