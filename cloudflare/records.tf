@@ -6,7 +6,7 @@ resource "cloudflare_record" "soubilabs_blog" {
   proxied = false
 }
 
-resource "cloudflare_record" "soubilabs_blog" {
+resource "cloudflare_record" "soubilabs_blog_star" {
   zone_id = var.soubilabs_zone_id
   name    = "*.blog"
   value   = "hashnode.network"
@@ -14,7 +14,7 @@ resource "cloudflare_record" "soubilabs_blog" {
   proxied = false
 }
 
-resource "cloudflare_record" "soubilabs_www" {
+resource "cloudflare_record" "soubilabs_labs" {
   zone_id = var.soubilabs_zone_id
   name    = "labs"
   value   = "soubinan.github.io"
@@ -22,7 +22,7 @@ resource "cloudflare_record" "soubilabs_www" {
   proxied = true
 }
 
-resource "cloudflare_record" "soubilabs_www" {
+resource "cloudflare_record" "soubilabs_labs_star" {
   zone_id = var.soubilabs_zone_id
   name    = "*.labs"
   value   = "soubinan.github.io"
