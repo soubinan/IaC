@@ -60,8 +60,8 @@ resource "cloudflare_ruleset" "ddos" {
       }
     }
 
-    expression  = "(http.host eq \"${var.soubilabs_domain}\")"
-    description = "Apply on all traffic going to soubilabs.xyz"
+    expression  = true
+    description = "Apply on all traffic"
     enabled     = true
   }
 }
