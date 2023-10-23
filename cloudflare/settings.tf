@@ -6,7 +6,7 @@ resource "cloudflare_zone_settings_override" "soubilabs_zone_settings" {
     brotli                   = "on"
     tls_1_3                  = "on"
     automatic_https_rewrites = "on"
-    ssl                      = "strict"
+    ssl                      = "full"
     min_tls_version          = "1.2"
 
     http2                       = null
