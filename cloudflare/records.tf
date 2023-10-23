@@ -19,7 +19,7 @@ resource "cloudflare_record" "soubilabs_labs" {
   name    = "labs"
   value   = "soubilabs.xyz"
   type    = "CNAME"
-  proxied = false
+  proxied = true
 }
 
 resource "cloudflare_record" "soubilabs_labs_star" {
@@ -27,7 +27,7 @@ resource "cloudflare_record" "soubilabs_labs_star" {
   name    = "*.labs"
   value   = "soubilabs.xyz"
   type    = "CNAME"
-  proxied = false
+  proxied = true
 }
 
 resource "cloudflare_record" "soubilabs_www" {
