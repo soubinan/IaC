@@ -60,6 +60,13 @@ resource "cloudflare_record" "soubilabs_spf" {
   type    = "TXT"
 }
 
+resource "cloudflare_record" "soubilabs_spf_www" {
+  zone_id = var.soubilabs_zone_id
+  name    = "www"
+  value   = "v=spf1 include:_spf.mx.cloudflare.net ~all"
+  type    = "TXT"
+}
+
 resource "cloudflare_record" "soubilabs_dkim" {
   zone_id = var.soubilabs_zone_id
   name    = "s1._domainkey"
