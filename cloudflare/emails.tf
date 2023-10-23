@@ -21,7 +21,9 @@ resource "cloudflare_email_routing_rule" "mail_soubilabs" {
 
   action {
     type  = "forward"
-    value = cloudflare_email_routing_address.soubinan_gmail.email
+    value = [
+      cloudflare_email_routing_address.soubinan_gmail.email
+    ]
   }
 }
 
@@ -38,6 +40,8 @@ resource "cloudflare_email_routing_rule" "soubinan_soubilabs" {
 
   action {
     type  = "forward"
-    value = cloudflare_email_routing_address.soubinan_gmail.email
+    value = [
+      cloudflare_email_routing_address.soubinan_gmail.email
+    ]
   }
 }
