@@ -45,23 +45,23 @@ resource "cloudflare_bot_management" "soubilabs_anti_bot" {
   fight_mode = true
 }
 
-resource "cloudflare_ruleset" "ddos" {
-  zone_id     = var.soubilabs_zone_id
-  name        = "ddos_rulset"
-  description = "DDOS attack shield"
-  kind        = "zone"
-  phase       = "ddos_l7"
+# resource "cloudflare_ruleset" "ddos" {
+#   zone_id     = var.soubilabs_zone_id
+#   name        = "ddos_rulset"
+#   description = "DDOS attack shield"
+#   kind        = "zone"
+#   phase       = "ddos_l7"
 
-  rules {
-    action = "managed_challenge"
-    action_parameters {
-      overrides {
-        sensitivity_level = "default"
-      }
-    }
+#   rules {
+#     action = "managed_challenge"
+#     action_parameters {
+#       overrides {
+#         sensitivity_level = "default"
+#       }
+#     }
 
-    expression  = true
-    description = "Apply on all traffic"
-    enabled     = true
-  }
-}
+#     expression  = true
+#     description = "Apply on all traffic"
+#     enabled     = true
+#   }
+# }
