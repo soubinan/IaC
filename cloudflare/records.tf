@@ -8,27 +8,27 @@ resource "cloudflare_record" "soubilabs_blog" {
 
 resource "cloudflare_record" "soubilabs_blog_star" {
   zone_id = var.soubilabs_zone_id
-  name    = "*.blog"
+  name    = "www.blog"
   value   = "hashnode.network"
   type    = "CNAME"
   proxied = false
 }
 
-resource "cloudflare_record" "soubilabs_labs" {
-  zone_id = var.soubilabs_zone_id
-  name    = "labs"
-  value   = "soubinan.github.io"
-  type    = "CNAME"
-  proxied = true
-}
+# resource "cloudflare_record" "soubilabs_labs" {
+#   zone_id = var.soubilabs_zone_id
+#   name    = "labs"
+#   value   = "soubinan.github.io"
+#   type    = "CNAME"
+#   proxied = true
+# }
 
-resource "cloudflare_record" "soubilabs_labs_star" {
-  zone_id = var.soubilabs_zone_id
-  name    = "*.labs"
-  value   = "soubinan.github.io"
-  type    = "CNAME"
-  proxied = true
-}
+# resource "cloudflare_record" "soubilabs_labs_star" {
+#   zone_id = var.soubilabs_zone_id
+#   name    = "*.labs"
+#   value   = "soubinan.github.io"
+#   type    = "CNAME"
+#   proxied = true
+# }
 
 resource "cloudflare_record" "soubilabs_www" {
   zone_id = var.soubilabs_zone_id
