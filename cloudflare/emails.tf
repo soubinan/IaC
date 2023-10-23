@@ -5,7 +5,7 @@ resource "cloudflare_email_routing_settings" "soubilabs" {
 
 resource "cloudflare_email_routing_address" "soubinan_gmail" {
   account_id = var.account_id
-  email      = "soubinan@soubilabs.xyz"
+  email      = "soubinan@gmail.com"
 }
 
 resource "cloudflare_email_routing_rule" "mail_soubilabs" {
