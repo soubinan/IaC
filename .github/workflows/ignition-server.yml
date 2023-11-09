@@ -1,0 +1,19 @@
+name: Ignition as a service
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build coreos/Containerfile
+      run: docker build . --file coreos/Containerfile --tag ignition-server:$(date +%s) --tag ignition-server:latest
+    - name: Push ignition-server:$(date +%s)
+      run: docker push ghcr.io/soubinan/ignition-server:latest
+    - name: Push ignition-server:latest
+      run: docker push ghcr.io/soubinan/ignition-server:$(date +%s)
