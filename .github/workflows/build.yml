@@ -1,0 +1,15 @@
+name: Ignition as a service
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build the Container image
+      run: docker build . --file Containerfile --tag ignition-server:$(date +%s)
