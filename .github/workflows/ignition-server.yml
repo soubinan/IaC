@@ -1,0 +1,20 @@
+name: Ignition as a service
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build coreos/Containerfile
+      run: |
+        docker build . --file coreos/Containerfile --tag ghcr.io/soubinan/ignition-server:latest --tag ghcr.io/soubinan/ignition-server:latest  \
+        --label "org.opencontainers.image.source=https://github.com/soubinan/IaC" \
+        --label "org.opencontainers.image.description=Ignition as a service"
+        docker login ghcr.io -u soubinan --password ${{ secrets.GHP }}
+        docker push ghcr.io/soubinan/ignition-server:latest
