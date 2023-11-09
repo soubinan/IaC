@@ -13,8 +13,16 @@ jobs:
     - uses: actions/checkout@v4
     - name: Build coreos/Containerfile
       run: |
-        docker build . --file coreos/Containerfile --tag ghcr.io/soubinan/ignition-server:latest --tag ghcr.io/soubinan/ignition-server:latest  \
+        docker build . --file coreos/Containerfile --tag ghcr.io/soubinan/ignition-server:latest \
         --label "org.opencontainers.image.source=https://github.com/soubinan/IaC" \
-        --label "org.opencontainers.image.description=Ignition as a service"
+        --label "org.opencontainers.image.description=Ignition as a service" \
+  push:
+    needs: build
+    if: github.event.pull_request.merged == true && startsWith(github.ref, 'refs/tags/v*.*.*')
+    runs-on: ubuntu-latest
+    steps:
+    - run: |
+        docker tag ghcr.io/soubinan/ignition-server:latest ghcr.io/soubinan/ignition-server:${{ github.ref_name }}
         docker login ghcr.io -u soubinan --password ${{ secrets.GHP }}
         docker push ghcr.io/soubinan/ignition-server:latest
+        docker push ghcr.io/soubinan/ignition-server:${{ github.ref_name }}
