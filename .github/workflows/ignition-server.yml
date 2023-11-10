@@ -29,9 +29,12 @@ jobs:
           type=semver,pattern={{version}}
           type=semver,pattern={{major}}.{{minor}}
           type=semver,pattern={{major}}
-          type=ref,event=tag
           type=ref,event=pr
-          type=sha
+        labels: |
+          --label "org.opencontainers.image.source=https://github.com/soubinan/IaC/coreos"
+          --label "org.opencontainers.image.url=https://github.com/soubinan/IaC/coreos"
+          --label "org.opencontainers.image.description=Ignition as a service"
+          --label "org.opencontainers.image.title=Ignition-Server"
   release:
     if: github.event_name == 'release'
     needs: build
@@ -46,6 +49,6 @@ jobs:
     - name: Build and push
       uses: docker/build-push-action@v5
       with:
-        context: .
+        context: ./coreos/ContainerFile
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
