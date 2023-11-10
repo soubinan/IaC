@@ -57,7 +57,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: "{{defaultContext}}:coreos"
-          file: "{context}/Containerfile"
+          file: "{{defaultContext}}:coreos/Containerfile"
           tags: ${{ needs.build.outputs.tags }}
           labels: ${{ needs.build.outputs.labels }}
           push: true
