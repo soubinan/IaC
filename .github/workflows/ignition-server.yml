@@ -11,6 +11,9 @@ on:
   release:
     types: [published]
 
+env:
+  TEST_TAG: soubinan/ignition-server:test
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -35,29 +38,32 @@ jobs:
             --label "org.opencontainers.image.url=https://github.com/soubinan/IaC/coreos"
             --label "org.opencontainers.image.description=Ignition as a service"
             --label "org.opencontainers.image.title=Ignition-Server"
-    outputs:
-      tags: ${{ steps.meta.outputs.tags }}
-      labels: ${{ steps.meta.outputs.labels }}
-  release:
-    if: github.event_name == 'release'
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
+      - name: Build and export to Docker
+        uses: docker/build-push-action@v5
+        with:
+          context: "{{defaultContext}}:coreos"
+          file: "./Containerfile"
+          load: true
+          tags: ${{ env.TEST_TAG }}
+      - name: Test
+        run: |
+          docker run --rm ${{ env.TEST_TAG }}
       - name: Login to Registry
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GHP }}
+        if: github.event_name == 'release'
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
           context: "{{defaultContext}}:coreos"
+          platforms: linux/amd64,linux/arm64
           file: "./Containerfile"
-          tags: ${{ needs.build.outputs.tags }}
-          labels: ${{ needs.build.outputs.labels }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
           push: true
+        if: github.event_name == 'release'
