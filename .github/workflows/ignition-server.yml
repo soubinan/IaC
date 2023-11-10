@@ -29,7 +29,7 @@ jobs:
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
             type=ref,event=pr
-            type="latest"
+            type=latest
           labels: |
             --label "org.opencontainers.image.source=https://github.com/soubinan/IaC/coreos"
             --label "org.opencontainers.image.url=https://github.com/soubinan/IaC/coreos"
