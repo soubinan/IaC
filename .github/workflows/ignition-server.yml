@@ -46,9 +46,12 @@ jobs:
         registry: ghcr.io
         username: ${{ github.repository_owner }}
         password: ${{ secrets.GHP }}
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
     - name: Build and push
       uses: docker/build-push-action@v5
       with:
-        context: ./coreos/ContainerFile
+        context: "{{defaultContext}}:coreos"
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
+        push: true
