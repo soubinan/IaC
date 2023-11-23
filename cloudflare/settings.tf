@@ -45,6 +45,11 @@ resource "cloudflare_bot_management" "soubilabs_anti_bot" {
   fight_mode = true
 }
 
+resource "cloudflare_zone_cache_reserve" "example" {
+  zone_id = var.soubilabs_zone_id
+  enabled = true
+}
+
 # resource "cloudflare_ruleset" "ddos" {
 #   zone_id     = var.soubilabs_zone_id
 #   name        = "ddos_rulset"
