@@ -4,11 +4,11 @@ controller:
   cockpit_install: true
   secrets_mount:
     remote_server: 192.168.100.9
-    remote_path: /mtn/SoubiDrives/VirtualizedShare/containers/.secrets
+    remote_path: /mnt/SoubiDrives/VirtualizedShare/containers/.secrets
     local_path: /var/mnt/shared/containers/secrets
   backups_mount:
     remote_server: 192.168.100.9
-    remote_path: /mtn/SoubiDrives/VirtualizedShare/containers/backups
+    remote_path: /mnt/SoubiDrives/VirtualizedShare/containers/backups
     local_path: /var/mnt/shared/containers/backups
   networks:
   - gateway: 192.168.100.1
@@ -22,11 +22,11 @@ controller_test:
   cockpit_install: true
   secrets_mount:
     remote_server: 192.168.100.9
-    remote_path: /mtn/SoubiDrives/VirtualizedShare/containers/.secrets
+    remote_path: /mnt/SoubiDrives/VirtualizedShare/containers/.secrets
     local_path: /var/mnt/shared/containers/secrets
   backups_mount:
     remote_server: 192.168.100.9
-    remote_path: /mtn/SoubiDrives/VirtualizedShare/containers/backups
+    remote_path: /mnt/SoubiDrives/VirtualizedShare/containers/backups
     local_path: /var/mnt/shared/containers/backups
   networks:
   - gateway: 192.168.90.1
