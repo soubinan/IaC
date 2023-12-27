@@ -111,7 +111,7 @@ systemd:
         RemainAfterExit=yes
         # No need Docker anymore :D
         ExecStart=/usr/bin/rpm-ostree override remove docker
-        ExecStart=/usr/bin/rpm-ostree install --allow-inactive cockpit-system cockpit-ostree cockpit-podman cockpit-storaged cockpit-packagekit cockpit-selinux cockpit-sosreport cockpit-networkmanager cockpit-kdump
+        ExecStart=/usr/bin/rpm-ostree install --allow-inactive cockpit-system cockpit-ostree cockpit-podman cockpit-storaged cockpit-packagekit cockpit-selinux cockpit-sosreport cockpit-networkmanager cockpit-kdump cockpit-navigator
 {% if xeguest_install %}
         ExecStart=/usr/bin/rpm-ostree install --allow-inactive xe-guest-utilities-latest
         ExecStart=/usr/bin/systemctl enable xe-linux-distribution --now
