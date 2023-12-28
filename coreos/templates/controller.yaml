@@ -350,7 +350,7 @@
         inline: |
           [Unit]
           Description=Container Volume Backup
-          After=network-online.target secrets-injector.service nfs-volume.service
+          After=network-online.target secrets-injector.service
           ConditionPathExists=/var/.postprovisioned__
 
           [Service]
