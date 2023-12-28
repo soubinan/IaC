@@ -30,17 +30,14 @@
 
           # NOTIFICATION_URLS=smtp://username:password@host:587/?fromAddress=sender@example.com&toAddresses=recipient@example.com
           # NOTIFICATION_LEVEL=error
-{% set apps = ['igniter'] %}
-{% for app in apps %}
-    - path: {{ bindings }}/backup/conf.d/{{ app }}.env
+    - path: {{ bindings }}/backup/conf.d/igniter.env
       mode: 0644
       contents:
         inline: |
-          BACKUP_SOURCES=/backup/{{ app }}
-          BACKUP_FILENAME=backup-{{ app }}-%Y%m%dT%H%M%S.tar.gz
-          BACKUP_LATEST_SYMLINK=backup-{{ app }}-latest.tar.gz
-          EXEC_LABEL={{ app }}
-{% endfor %}
+          BACKUP_SOURCES=/backup/igniter
+          BACKUP_FILENAME=backup-igniter-%Y%m%dT%H%M%S.tar.gz
+          BACKUP_LATEST_SYMLINK=backup-igniter-latest.tar.gz
+          EXEC_LABEL=igniter
     # Containers Network
     - path: /etc/containers/systemd/base.network
       mode: 0644
