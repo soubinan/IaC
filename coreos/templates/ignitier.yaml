@@ -1,0 +1,171 @@
+{% extends "base.yaml" %}
+{% block directories %}
+    - path: {{ bindings }}/backup
+{% endblock directories %}
+{% block files %}
+    - path: {{ bindings }}/backup/common.env
+      mode: 0644
+      contents:
+        inline: |
+          ########### BACKUP SCHEDULE
+          BACKUP_CRON_EXPRESSION=0 */6 * * *
+          BACKUP_COMPRESSION=gz
+          BACKUP_EXCLUDE_REGEXP=\.log$
+          ########### BACKUP STORAGE
+          BACKUP_ARCHIVE=/archive
+          ########### BACKUP PRUNING
+          BACKUP_RETENTION_DAYS=7
+          BACKUP_PRUNING_LEEWAY=1m
+          ########### BACKUP ENCRYPTION
+          # GPG_PASSPHRASE=<xxx>
+          ########### NOTIFICATIONS
+          # Notifications (email, Slack, etc.) can be sent out when a backup run finishes.
+          # Configuration is provided as a comma-separated list of URLs as consumed
+          # by `shoutrrr`: https://containrrr.dev/shoutrrr/0.7/services/overview/
+          # The content of such notifications can be customized. Dedicated documentation
+          # on how to do this can be found in the README. When providing multiple URLs or
+          # an URL that contains a comma, the values can be URL encoded to avoid ambiguities.
+          # The below URL demonstrates how to send an email using the provided SMTP
+          # configuration and credentials.
+
+          # NOTIFICATION_URLS=smtp://username:password@host:587/?fromAddress=sender@example.com&toAddresses=recipient@example.com
+          # NOTIFICATION_LEVEL=error
+{% set apps = ['igniter'] %}
+{% for app in apps %}
+    - path: {{ bindings }}/backup/conf.d/{{ app }}.env
+      mode: 0644
+      contents:
+        inline: |
+          BACKUP_SOURCES=/backup/{{ app }}
+          BACKUP_FILENAME=backup-{{ app }}-%Y%m%dT%H%M%S.tar.gz
+          BACKUP_LATEST_SYMLINK=backup-{{ app }}-latest.tar.gz
+          EXEC_LABEL={{ app }}
+{% endfor %}
+    # Containers Network
+    - path: /etc/containers/systemd/base.network
+      mode: 0644
+      contents:
+        inline: |
+          [Unit]
+          Description=Frontnet container network for externally accessible services
+          After=network-online.target
+
+          [Network]
+          Subnet=10.100.1.1/24
+
+          [Install]
+          WantedBy=multi-user.target
+    # Volumes
+    - path: /etc/containers/systemd/igniter_dump.volume
+      mode: 0644
+      contents:
+        inline: |
+          [Volume]
+          User=core
+          Group=core
+    - path: /etc/containers/systemd/nfs-backups.volume
+      mode: 0644
+      contents:
+        inline: |
+          [Volume]
+          User=core
+          Group=core
+          PodmanArgs=--driver local --opt type=nfs --opt o=async,addr={{ backups_mount.remote_server }},nfsvers=4,rw --opt device={{ backups_mount.remote_server }}:{{ backups_mount.remote_path }}
+    - path: /etc/containers/systemd/nfs-templates.volume
+      mode: 0644
+      contents:
+        inline: |
+          [Volume]
+          User=core
+          Group=core
+          PodmanArgs=--driver local --opt type=nfs --opt o=async,addr={{ templates_mount.remote_server }},nfsvers=4,rw --opt device={{ templates_mount.remote_server }}:{{ templates_mount.remote_path }}
+    # Containers
+    - path: /etc/containers/systemd/igniter.container
+      mode: 0644
+      contents:
+        inline: |
+          [Unit]
+          Description=Ignition Server Container
+          After=network-online.target
+          ConditionPathExists=/var/.postprovisioned__
+
+          [Service]
+          TimeoutStartSec=900
+          Restart=on-failure
+
+          [Container]
+          User=core
+          Group=core
+          ContainerName=igniter
+          Image=ghcr.io/soubinan/ignition-server:latest
+          AutoUpdate=registry
+          HostName=ign.lab.soubilabs.xyz
+          PublishPort=80:8000
+          Network=base.network
+          Volume=nfs-templates.volume:/app/templates:Z
+          Volume=igniter_dump.volume:/backup:z
+          Label="docker-volume-backup.archive-pre=/bin/sh -c 'cp -r /app/templates /backup'"
+          Label=docker-volume-backup.exec-label=igniter
+
+          [Install]
+          WantedBy=multi-user.target
+    - path: /etc/containers/systemd/backup.container
+      mode: 0644
+      contents:
+        inline: |
+          [Unit]
+          Description=Container Volume Backup
+          After=network-online.target
+          ConditionPathExists=/var/.postprovisioned__
+
+          [Service]
+          TimeoutStartSec=900
+          Restart=on-failure
+
+          [Container]
+          User=core
+          Group=core
+          ContainerName=backup
+          Image=docker.io/offen/docker-volume-backup:latest
+          AutoUpdate=registry
+          Network=base.network
+          EnvironmentFile=/var/containers/bindings/backup/common.env
+          Mount=type=volume,source=nfs-backups.volume,target=/archive
+          Volume={{ bindings }}/backup/conf.d:/etc/dockervolumebackup/conf.d:ro,Z
+          Volume=igniter_dump.volume:/backup/igniter:ro,z
+
+          [Install]
+          WantedBy=multi-user.target
+{% endblock files %}
+{% block units %}
+    - name: {{ (templates_mount.local_path| trim("/")) | replace("/", "-") }}.mount
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Mount data directory
+        After=network-online.target
+        ConditionPathExists=/var/.provisioned__
+
+        [Mount]
+        What={{ templates_mount.remote_server }}:{{ templates_mount.remote_path }}
+        Where={{ templates_mount.local_path }}
+        Type=nfs4
+
+        [Install]
+        WantedBy=multi-user.target
+    - name: {{ (backups_mount.local_path| trim("/")) | replace("/", "-") }}.mount
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Mount data directory
+        After=network-online.target
+        ConditionPathExists=/var/.provisioned__
+
+        [Mount]
+        What={{ backups_mount.remote_server }}:{{ backups_mount.remote_path }}
+        Where={{ backups_mount.local_path }}
+        Type=nfs4
+
+        [Install]
+        WantedBy=multi-user.target
+{% endblock units %}

@@ -1,3 +1,6 @@
+base:
+  template: ./base.yaml
+  hostname: coreos
 controller:
   template: ./controller.yaml
   hostname: controller
@@ -34,12 +37,45 @@ controller_test:
     ip: 192.168.90.6
     nameserver: 192.168.90.1
     prefix: 24
+igniter:
+  template: ./igniter.yaml
+  hostname: igniter
+  templates_mount:
+    remote_server: 192.168.100.9
+    remote_path: /mnt/SoubiDrives/VirtualizedShare/containers/templates
+    local_path: /var/mnt/shared/containers/templates
+  backups_mount:
+    remote_server: 192.168.100.9
+    remote_path: /mnt/SoubiDrives/VirtualizedShare/containers/backups
+    local_path: /var/mnt/shared/containers/backups
+  networks:
+  - gateway: 192.168.100.1
+    interface: eno1
+    ip: 192.168.100.5
+    nameserver: 192.168.100.1
+    prefix: 24
+igniter_test:
+  template: ./igniter.yaml
+  hostname: igniter_test
+  cockpit_install: true
+  templates_mount:
+    remote_server: 192.168.100.9
+    remote_path: /mnt/SoubiDrives/VirtualizedShare/containers/templates
+    local_path: /var/mnt/shared/containers/templates
+  backups_mount:
+    remote_server: 192.168.100.9
+    remote_path: /mnt/SoubiDrives/VirtualizedShare/containers/backups
+    local_path: /var/mnt/shared/containers/backups
+  networks:
+  - gateway: 192.168.90.1
+    interface: enp1s0
+    ip: 192.168.90.5
+    nameserver: 192.168.90.1
+    prefix: 24
 icognito:
   template: ./icognito.yaml
   hostname: icognito
 mediatech:
   template: ./mediatech.yaml
   hostname: mediatech
-base:
-  template: ./base.yaml
-  hostname: coreos
+
