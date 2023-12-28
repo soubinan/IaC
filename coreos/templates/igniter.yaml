@@ -99,7 +99,7 @@
           HostName=ign.lab.soubilabs.xyz
           PublishPort=80:8000
           Network=base.network
-          Volume=nfs-templates.volume:/app/templates:Z
+          Mount=type=volume,source=nfs-templates.volume,target=/app/templates
           Volume=igniter_dump.volume:/backup:z
           Label="docker-volume-backup.archive-pre=/bin/sh -c 'cp -r /app/templates /backup'"
           Label=docker-volume-backup.exec-label=igniter
