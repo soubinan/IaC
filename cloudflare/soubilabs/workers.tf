@@ -24,26 +24,26 @@ resource "cloudflare_worker_route" "soubilabs_mta_sts_route" {
 }
 
 # LXC HomeLab inventory worker script
-resource "cloudflare_worker_script" "lxcbuilds_script" {
+resource "cloudflare_worker_script" "homelab_lxc_script" {
   account_id = var.account_id
-  name       = "lxc_builds"
+  name       = "homelab_lxc_script"
   content    = file("${path.module}/scripts/homelab-lxc.js")
 }
 
-resource "cloudflare_worker_domain" "soubilabs_lxcbuilds" {
+resource "cloudflare_worker_domain" "soubilabs_homelab_lxc" {
   account_id = var.account_id
   zone_id    = var.soubilabs_zone_id
   hostname   = "lxc-images.${var.soubilabs_domain}"
-  service    = cloudflare_worker_script.lxcbuilds_script.name
+  service    = cloudflare_worker_script.homelab_lxc_script.name
 }
 
-resource "cloudflare_worker_route" "soubilabs_lxcbuilds_route" {
+resource "cloudflare_worker_route" "soubilabs_homelab_lxc_route" {
   zone_id     = var.soubilabs_zone_id
   pattern     = "lxc-images.${var.soubilabs_domain}/*"
-  script_name = cloudflare_worker_script.lxcbuilds_script.name
+  script_name = cloudflare_worker_script.homelab_lxc_script.name
 
   depends_on = [
-    cloudflare_worker_domain.soubilabs_lxcbuilds,
-    cloudflare_worker_script.lxcbuilds_script
+    cloudflare_worker_domain.soubilabs_homelab_lxc,
+    cloudflare_worker_script.homelab_lxc_script
   ]
 }

@@ -132,7 +132,7 @@ export default {
         This domain lists many LXC images built for use on Proxmox based Homelabs (or any other environments supporting LXCs).<br>
         Lets avoid <strong>over-containerization</strong> (Docker/Postman in LXC) and <strong>over-virtualization</strong> (Docker/Postman on vms) and simply use native LXCs instead.<br>
         All images available here are generated using <a href="https://linuxcontainers.org/distrobuilder/docs/latest" target="blank">distrobuilder</a> along with dedicated <a target="blank" href="https://github.com/soubinan/homelab-lxc/tree/dev/templates">YAML definitions files</a>.<br>
-        The build themselves can be seen in the repo's Github actions.<br>
+        The build themselves can be seen in the <a href="https://github.com/soubinan/homelab-lxc/actions">repo's Github actions</a>.<br>
         Images are generated as builds artifacts and the related links shared on this page.<br>
         This is first of all a personal project built for my own needs, then shared because it could help someone else (hopefully..).<br>
         <br>
