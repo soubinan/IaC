@@ -68,7 +68,7 @@ async function handleRequest(request) {
   const htmlContent = `<!DOCTYPE html>
   <html>
   <head>
-    <title>Builds Details</title>
+    <title>My Custom LXC images</title>
 
     <link rel="icon" href="https://linuxcontainers.org/static/img/containers.svg" type="image/x-icon">
     
