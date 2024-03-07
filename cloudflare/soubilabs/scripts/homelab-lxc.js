@@ -2,7 +2,7 @@ const respHeaders = {
   "content-type": "text/html;charset=UTF-8",
 }
 
-const url = "https://api-us-west-2.hygraph.com/v2/clt9ua1uu25rb07uzgwllv5zu/master";
+const url = "https://us-west-2.cdn.hygraph.com/content/clt9ua1uu25rb07uzgwllv5zu/master";
 const body = {
   query: `
     query MyQuery {
@@ -13,7 +13,7 @@ const body = {
           distRelease
           architecture
           version
-          link
+          buildId
           size
           createdAt
         }
@@ -45,20 +45,23 @@ async function handleRequest(request) {
   const jsonData = await gatherResponse(response);
 
   let rows = ``
+
   jsonData.data.applications.forEach(app => {
     app.builds.forEach((build) => {
       const dateObj = new Date(build.createdAt);
       const isoDate = dateObj.toISOString();
       const formattedDate = isoDate.substring(0, 10);
       const formattedTime = isoDate.substring(11, 16);
+      const buildIdMeta = (build.buildId).replace(".tar.xz", "-meta.tar.xz");
+
       rows = rows + `
       <tr>
       <td>${app.name}</td>
       <td>${build.distribution} ${build.distRelease}</td>
       <td>${build.architecture}</td>
       <td>${build.version}</td>
-      <td>${build.link}</td>
-      <td>${build.size}</td>
+      <td><a href="https://download-lxc-images.soubilabs.xyz/${build.buildId}">${build.buildId}</a>&nbsp;and&nbsp;<a href="https://download-lxc-images.soubilabs.xyz/${buildIdMeta}">metadata</a></td>
+      <td>~${build.size}B</td>
       <td>${formattedDate}_${formattedTime}</td>
       </tr>
       `;
@@ -122,21 +125,21 @@ async function handleRequest(request) {
   <div id="container">
     <h1>The HomeLab's Custom Linux Containers Inventory</h1>
     <p>Like TurnKey's images but open and <i>shamelessly inspired by <a href="https://images.linuxcontainers.org">images.linuxcontainers.org</a></i></p>
-    <aside id="intro">
+    <article id="intro">
       <p>
       This domain lists many LXC images built for use on Proxmox based Homelabs (or any other environments supporting LXCs).<br>
       Lets avoid <strong>over-containerization</strong> (Docker/Postman in LXC) and <strong>over-virtualization</strong> (Docker/Postman on vms) and simply use native LXCs instead.<br>
       All images available here are generated using <a href="https://linuxcontainers.org/distrobuilder/docs/latest" target="blank">distrobuilder</a> along with dedicated <a target="blank" href="https://github.com/soubinan/homelab-lxc/tree/dev/templates">YAML definitions files</a>.<br>
-      The build themselves can be seen in the <a href="https://github.com/soubinan/homelab-lxc/actions">repo's Github actions</a>.<br>
+      The build themselves can be seen in the <a target="blank" href="https://github.com/soubinan/homelab-lxc/actions">repo's Github actions</a>.<br>
       Images are generated as builds artifacts and the related links shared on this page.<br>
       This is first of all a personal project built for my own needs, then shared because it could help someone else (hopefully..).<br>
       <br>
-      Only 5 last versions built are listed for each application.<br>
+      <i>At most 3 last versions are listed for each application.</i>
       </p>
       <img src="https://linuxcontainers.org/static/img/containers.svg" alt="Linux Container Logo" width="300" height="300" style="border: none;">
-    </aside>
+    </article>
     <p>
-      To use those images, unzip the packages and import the rootfs tarball (and the meta tarball optionally) into your LXC platform.
+    Unfortunately public storage is not free, so if you found those images useful, please consider donate (your simply give a star to the project)
     </p>
     <h2>Available images</h2>
     <table id="buildsTable" class="display compact" style="width:100%">
@@ -146,7 +149,7 @@ async function handleRequest(request) {
           <th>Distribution</th>
           <th>Architecture</th>
           <th>Version</th>
-          <th>Link</th>
+          <th>Download</th>
           <th>Size</th>
           <th>Build Date</th>
         </tr>
