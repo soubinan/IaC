@@ -40,6 +40,10 @@ async function gatherResponse(response) {
   }
 }
 
+function toTitleCase(s) {
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
 async function handleRequest(request) {
   const response = await fetch(url, req);
   const jsonData = await gatherResponse(response);
@@ -56,8 +60,8 @@ async function handleRequest(request) {
 
       rows = rows + `
       <tr>
-      <td>${app.name}</td>
-      <td>${build.distribution} ${build.distRelease}</td>
+      <td>${toTitleCase(app.name)}</td>
+      <td>${toTitleCase(build.distribution)} ${toTitleCase(build.distRelease)}</td>
       <td>${build.architecture}</td>
       <td>${build.version}</td>
       <td><a href="https://download-lxc-images.soubilabs.xyz/${build.buildId}">${build.buildId}</a>&nbsp;and&nbsp;<a href="https://download-lxc-images.soubilabs.xyz/${buildIdMeta}">metadata</a></td>
