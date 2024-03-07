@@ -32,3 +32,15 @@ override.tf.json
 # Ignore CLI configuration files
 .terraformrc
 terraform.rc
+
+# Ignore credentials file
+.creds.tf
+
+# Ignore wrangler dev files and directories
+.dev.vars
+.wrangler/
+node_modules/
+
+# Ignore external/abandoned projects
+xenorchestra/
+homelab-lxc/
