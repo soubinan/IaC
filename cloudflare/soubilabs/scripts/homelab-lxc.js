@@ -8,6 +8,7 @@ const body = {
     query MyQuery {
       applications(orderBy: name_ASC) {
         name
+        source
         builds(orderBy: publishedAt_DESC, first: 5) {
           distribution
           distRelease
@@ -60,11 +61,11 @@ async function handleRequest(request) {
 
       rows = rows + `
       <tr>
-      <td>${toTitleCase(app.name)}</td>
-      <td>${toTitleCase(build.distribution)} ${toTitleCase(build.distRelease)}</td>
-      <td>${build.architecture}</td>
+      <td><a target="blank" href="${app.source}">${toTitleCase(app.name)}</a></td>
       <td>${build.version}</td>
-      <td><a href="https://download-lxc-images.soubilabs.xyz/${build.buildId}">${build.buildId}</a>&nbsp;and&nbsp;<a href="https://download-lxc-images.soubilabs.xyz/${buildIdMeta}">metadata</a></td>
+      <td>${toTitleCase(build.distribution)} <i>${build.distRelease}</i></td>
+      <td>${build.architecture}</td>
+      <td><a href="https://download-lxc-images.soubilabs.xyz/${build.buildId}">${build.buildId}</a> | <a href="https://download-lxc-images.soubilabs.xyz/${buildIdMeta}">metadata</a></td>
       <td>~${build.size}B</td>
       <td>${formattedDate}_${formattedTime}</td>
       </tr>
@@ -77,12 +78,12 @@ async function handleRequest(request) {
   <head>
     <title>My Custom LXC images</title>
 
-    <link rel="icon" href="https://linuxcontainers.org/static/img/containers.svg" type="image/x-icon">
-    
+    <link href="https://linuxcontainers.org/static/img/containers.svg" type="image/x-icon" rel="icon">
     <link href="https://cdn.datatables.net/2.0.1/css/dataTables.dataTables.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.datatables.net/v/bs5/jq-3.7.0/dt-2.0.1/fh-4.0.0/r-3.0.0/rg-1.5.0/datatables.min.css" rel="stylesheet">
-    
+
+    <script src="https://kit.fontawesome.com/75a73f799c.js" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.datatables.net/v/bs5/jq-3.7.0/dt-2.0.1/fh-4.0.0/r-3.0.0/rg-1.5.0/datatables.min.js"></script>
     
@@ -91,11 +92,30 @@ async function handleRequest(request) {
       body {
         color: #2c2c2c;
         background-color: #F7EEDD;
-        padding: 1em;
-        padding-left: 5em;
-        padding-right: 5em;
+        font-size: 1em;
       }
-      h1, h2, thead {
+      #container {
+        width: 95%;
+        max-width: 1024px;
+        margin: auto;
+        padding: 1%;
+      }
+      footer {
+        margin-top: 50px;
+      }
+
+      #intro {
+        display: flex;
+        align-items: center;
+      }
+      #intro>p {
+        width: 80%
+      }
+      #intro>img {
+        width: 20%
+      }
+
+      h1, h2, h3 {
         color: #8f1e00
       }
       a {
@@ -111,21 +131,49 @@ async function handleRequest(request) {
       p, img {
         margin-right: 15px;
       }
-      #intro {
-        display: flex;
-        align-items: center;
+
+      #back-to-top {
+        // display: inline-block;
+        background-color: #8f1e00;
+        width: 50px;
+        height: 50px;
+        text-align: center;
+        border-radius: 4px;
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        transition: background-color .3s, opacity .5s, visibility .5s;
+        opacity: 0;
+        visibility: hidden;
+        z-index: 1000;
       }
-      #container {
-        width: 80em;
-        margin: auto;
+      #back-to-top::after {
+        display: inline-block;
+        text-rendering: auto;
+        -webkit-font-smoothing: antialiased;
+        font: var(--fa-font-solid);
+        content: "\\f106";
+        color: #F7EEDD;
+        font-size: 2em;
+        font-style: normal;
+        line-height: 50px;
       }
-      footer {
-        margin-top: 50px;
+      #back-to-top:hover {
+        cursor: pointer;
+        background-color: #2c2c2c;
+      }
+      #back-to-top:active {
+        background-color: #555;
+      }
+      #back-to-top.show {
+        opacity: 1;
+        visibility: visible;
       }
     </style>
   </head>
 
   <body>
+  <a id="back-to-top"></a>
   <div id="container">
     <h1>The HomeLab's Custom Linux Containers Inventory</h1>
     <p>Like TurnKey's images but open and <i>shamelessly inspired by <a href="https://images.linuxcontainers.org">images.linuxcontainers.org</a></i></p>
@@ -143,40 +191,58 @@ async function handleRequest(request) {
       <img src="https://linuxcontainers.org/static/img/containers.svg" alt="Linux Container Logo" width="300" height="300" style="border: none;">
     </article>
     <p>
-    Unfortunately public storage is not free, so if you found those images useful, please consider donate (your simply give a star to the project)
+    Unfortunately public storage and hosting are not free, so if you find those images useful, please consider <a target="blank" href="https://github.com/sponsors/soubinan">to be a sponsor</a> to help maintain this project alive or simply give a star to <a href="https://github.com/soubinan/homelab-lxc" target="blank">this project's repo</a>.
     </p>
     <h2>Available images</h2>
     <table id="buildsTable" class="display compact" style="width:100%">
       <thead>
         <tr>
-          <th>Application</th>
-          <th>Distribution</th>
-          <th>Architecture</th>
-          <th>Version</th>
+          <th>Group</th>
+          <th style="min-width:10%; max-width:20%">Application</th>
+          <th style="width:20%">Distribution</th>
+          <th style="width:10%">Architecture</th>
           <th>Download</th>
-          <th>Size</th>
-          <th>Build Date</th>
+          <th style="width:10%">Size</th>
+          <th style="width:15%">Build Date</th>
         </tr>
       </thead>
       <tbody>
       ${rows}
       </tbody>
     </table>
-    <footer>
+    <!--<footer>
     Shared by <a href="https://github.com/soubinan">Soubinan</a>
-    </footer>
+    </footer>-->
   </div>
 
   <script>
+    var groupColumn = 0;
     $(document).ready( function () {
       $('#buildsTable').DataTable(
         {
+          columnDefs: [{ visible: false, targets: groupColumn }],
+          order: [[groupColumn, 'asc']],
           responsive: true,
           fixedHeader: true,
           paging: false,
           rowGroup: true
         }
       );
+    });
+
+    var btn = $('#back-to-top');
+
+    $(window).scroll(function() {
+      if ($(window).scrollTop() > 300) {
+        btn.addClass('show');
+      } else {
+        btn.removeClass('show');
+      }
+    });
+    
+    btn.on('click', function(e) {
+      e.preventDefault();
+      $('html, body').animate({scrollTop:0}, '300');
     });
   </script>
   </body>
