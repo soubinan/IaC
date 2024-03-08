@@ -194,6 +194,7 @@ async function handleRequest(request) {
     Unfortunately public storage and hosting are not free, so if you find those images useful, please consider <a target="blank" href="https://github.com/sponsors/soubinan">to be a sponsor</a> to help maintain this project alive or simply give a star to <a href="https://github.com/soubinan/homelab-lxc" target="blank">this project's repo</a>.
     </p>
     <h2>Available images</h2>
+    <p>Your favorite application is missing ? <a href="https://github.com/soubinan/homelab-lxc/issues/new">please open an issue</a>, I will try to add it as soon as possible, or you can simply contribute to the project as well.</p>
     <table id="buildsTable" class="display compact" style="width:100%">
       <thead>
         <tr>
