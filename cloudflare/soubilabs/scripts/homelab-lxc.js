@@ -6,7 +6,7 @@ const url = "https://us-west-2.cdn.hygraph.com/content/clt9ua1uu25rb07uzgwllv5zu
 const body = {
   query: `
     query MyQuery {
-      applications(orderBy: name_ASC) {
+      applications(where: {isForTest: false}, orderBy: name_ASC) {
         name
         source
         builds(orderBy: publishedAt_DESC, first: 5) {
