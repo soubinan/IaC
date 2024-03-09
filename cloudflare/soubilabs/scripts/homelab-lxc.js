@@ -58,6 +58,7 @@ async function handleRequest(request) {
       const formattedDate = isoDate.substring(0, 10);
       const formattedTime = isoDate.substring(11, 16);
       const buildIdMeta = (build.buildId).replace(".tar.xz", "-meta.tar.xz");
+      const buildIdRoot = (build.buildId).replace(".tar.xz", "-root.tar.xz");
 
       rows = rows + `
       <tr>
@@ -65,7 +66,7 @@ async function handleRequest(request) {
       <td>${build.version}</td>
       <td>${toTitleCase(build.distribution)} <i>${build.distRelease}</i></td>
       <td>${build.architecture}</td>
-      <td><a href="https://download-lxc-images.soubilabs.xyz/${build.buildId}">${build.buildId}</a> | <a href="https://download-lxc-images.soubilabs.xyz/${buildIdMeta}">metadata</a></td>
+      <td><a href="https://download-lxc-images.soubilabs.xyz/${buildIdRoot}">${buildIdRoot}</a> | <a href="https://download-lxc-images.soubilabs.xyz/${buildIdMeta}">metadata</a></td>
       <td>~${build.size}B</td>
       <td>${formattedDate}_${formattedTime}</td>
       </tr>
@@ -96,7 +97,7 @@ async function handleRequest(request) {
       }
       #container {
         width: 95%;
-        max-width: 1024px;
+        max-width: 1440px;
         margin: auto;
         padding: 1%;
       }
