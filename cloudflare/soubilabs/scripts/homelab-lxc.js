@@ -67,8 +67,8 @@ async function handleRequest(request) {
       <td>${toTitleCase(build.distribution)} <i>${build.distRelease}</i></td>
       <td>${build.architecture}</td>
       <td><a href="https://download-lxc-images.soubilabs.xyz/${buildIdRoot}">${buildIdRoot}</a> | <a href="https://download-lxc-images.soubilabs.xyz/${buildIdMeta}">metadata</a></td>
-      <td>~${build.size}B</td>
       <td>${formattedDate}_${formattedTime}</td>
+      <td>~${build.size}B</td>
       </tr>
       `;
     });
@@ -131,6 +131,9 @@ async function handleRequest(request) {
       }
       p, img {
         margin-right: 15px;
+      }
+      tr {
+        white-space: nowrap;
       }
 
       #back-to-top {
@@ -200,12 +203,12 @@ async function handleRequest(request) {
       <thead>
         <tr>
           <th>Group</th>
-          <th style="min-width:10%; max-width:20%">Application</th>
-          <th style="width:20%">Distribution</th>
-          <th style="width:10%">Architecture</th>
+          <th style="max-width:15%">Application</th>
+          <th style="max-width:15%">Distribution</th>
+          <th style="max-width:10%">Architecture</th>
           <th>Download</th>
-          <th style="width:10%">Size</th>
-          <th style="width:15%">Build Date</th>
+          <th style="max-width:15%">Build Date</th>
+          <th style="max-width:8%">Size</th>
         </tr>
       </thead>
       <tbody>
