@@ -3,7 +3,7 @@ const respHeaders = {
 }
 
 const url = "https://us-west-2.cdn.hygraph.com/content/clt9ua1uu25rb07uzgwllv5zu/master";
-const body = {
+const buildsByAppsGQL = {
   query: `
     query MyQuery {
       applications(where: {isForTest: false}, orderBy: name_ASC) {
@@ -23,8 +23,29 @@ const body = {
     `,
 }
 
-const req = {
-  body: JSON.stringify(body),
+const allTagsGQL = {
+  query: `
+    query MyQuery {
+      applications(where: {isForTest: false}, orderBy: name_ASC) {
+        name
+      }
+    }
+    `,
+}
+
+
+const buildsByAppsRequest = {
+  body: JSON.stringify(buildsByAppsGQL),
+  method: "POST",
+  headers: {
+    "content-type": "application/json;charset=UTF-8",
+    "Accept": "application/json",
+  }
+  ,
+};
+
+const allTagsRequest = {
+  body: JSON.stringify(allTagsGQL),
   method: "POST",
   headers: {
     "content-type": "application/json;charset=UTF-8",
@@ -46,12 +67,14 @@ function toTitleCase(s) {
 }
 
 async function handleRequest(request) {
-  const response = await fetch(url, req);
-  const jsonData = await gatherResponse(response);
+  const buildsByAppsResponse = await fetch(url, buildsByAppsRequest);
+  const buildsByAppsJsonData = await gatherResponse(buildsByAppsResponse);
+  const allTagsResponse = await fetch(url, allTagsRequest)
+  const allTagsJsonData = await gatherResponse(allTagsResponse);
 
   let rows = ``
 
-  jsonData.data.applications.forEach(app => {
+  buildsByAppsJsonData.data.applications.forEach(app => {
     app.builds.forEach((build) => {
       const dateObj = new Date(build.createdAt);
       const isoDate = dateObj.toISOString();
@@ -72,6 +95,14 @@ async function handleRequest(request) {
       </tr>
       `;
     });
+  })
+
+  let tags = ``
+
+  allTagsJsonData.data.applications.forEach(app => {
+    tags = tags + `
+    <label class="checkbox-button"><input type="checkbox" name="tags" value="${app.name}" class="tag-filter">${app.name}</label>
+    `;
   })
 
   const htmlContent = `<!DOCTYPE html>
@@ -134,11 +165,38 @@ async function handleRequest(request) {
       }
       tr {
         white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      input[type="checkbox"] {
+        display: none;
+      }
+
+      label.checkbox-button {
+        display: inline-block;
+        padding: 5px 5px;
+        background-color: #transparent;
+        color: #8B4513;
+        border: 1px solid #8B4513;
+        border-radius: 5px;
+        cursor: pointer;
+        min-width: 30px;
+        text-align: center;
+        font-size: 0.7em;
+      }
+
+      label.checked {
+        background-color: #8B4513;
+        color: white;
+        font-weight: bold;
+        font-size: 0.9em;
+        border-color: #8B4513;
       }
 
       #back-to-top {
         // display: inline-block;
-        background-color: #8f1e00;
+        background-color: #8B4513;
         width: 50px;
         height: 50px;
         text-align: center;
@@ -164,10 +222,10 @@ async function handleRequest(request) {
       }
       #back-to-top:hover {
         cursor: pointer;
-        background-color: #2c2c2c;
+        background-color: #8f1e00;
       }
       #back-to-top:active {
-        background-color: #555;
+        background-color: #F7EEDD;
       }
       #back-to-top.show {
         opacity: 1;
@@ -180,7 +238,7 @@ async function handleRequest(request) {
   <a id="back-to-top"></a>
   <div id="container">
     <h1>The HomeLab's Custom Linux Containers Inventory</h1>
-    <p>Like TurnKey's images but open and <i>shamelessly inspired by <a href="https://images.linuxcontainers.org">images.linuxcontainers.org</a></i></p>
+    <p><i>An actively maintained listing of customized LXC images</i></p>
     <article id="intro">
       <p>
       This domain lists many LXC images built for use on Proxmox based Homelabs (or any other environments supporting LXCs).<br>
@@ -199,6 +257,11 @@ async function handleRequest(request) {
     </p>
     <h2>Available images</h2>
     <p>Your favorite application is missing ? <a href="https://github.com/soubinan/homelab-lxc/issues/new">please open an issue</a>, I will try to add it as soon as possible, or you can simply contribute to the project as well.</p>
+    <form>
+      Categories:
+      <label class="checkbox-button checked"><input type="checkbox" name="tags" value="all-tags" checked id="all-tags" class="tag-filter">All</label>
+      ${tags}
+    </form>
     <table id="buildsTable" class="display compact" style="width:100%">
       <thead>
         <tr>
@@ -212,7 +275,7 @@ async function handleRequest(request) {
         </tr>
       </thead>
       <tbody>
-      ${rows}
+        ${rows}
       </tbody>
     </table>
     <!--<footer>
@@ -221,21 +284,57 @@ async function handleRequest(request) {
   </div>
 
   <script>
-    var groupColumn = 0;
-    $(document).ready( function () {
-      $('#buildsTable').DataTable(
-        {
-          columnDefs: [{ visible: false, targets: groupColumn }],
-          order: [[groupColumn, 'asc']],
-          responsive: true,
-          fixedHeader: true,
-          paging: false,
-          rowGroup: true
+    let groupColumn = 0;
+
+    const table = new DataTable('#buildsTable',
+      {
+        columnDefs: [{ visible: false, targets: groupColumn }],
+        order: [[groupColumn, 'asc']],
+        responsive: true,
+        fixedHeader: true,
+        paging: false,
+        rowGroup: true,
+        ordering: false
+      }
+    );
+
+    const allTags = document.querySelector('#all-tags');
+    const tagsInputs = document.querySelectorAll('.tag-filter');
+
+    tagsInputs.forEach(tagInput => {
+      tagInput.addEventListener('change', function () {
+
+        if (tagInput.value != 'all-tags') {
+          allTags.checked = false;
         }
-      );
+
+        let tagsInputsSelected = []
+
+        tagsInputs.forEach(tagInput => {
+          if (tagInput.checked) {
+            tagInput.parentElement.classList.add('checked');
+            tagsInputsSelected.push(tagInput.value);
+          } else {
+            tagInput.parentElement.classList.remove('checked');
+          }
+        });
+
+        if (tagsInputsSelected.length === 0) {
+          allTags.checked = true;
+          allTags.parentElement.classList.add('checked');
+        }
+
+        table.column(1).search(function (d) {
+          if (tagInput.value != 'all-tags' && tagsInputsSelected.length !== 0) {
+            return tagsInputsSelected.some(value => d.includes(value))
+          } else {
+            return true;
+          }
+        }).draw();
+      });
     });
 
-    var btn = $('#back-to-top');
+    let btn = $('#back-to-top');
 
     $(window).scroll(function() {
       if ($(window).scrollTop() > 300) {
