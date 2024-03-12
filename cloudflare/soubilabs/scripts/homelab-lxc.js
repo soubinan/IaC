@@ -5,9 +5,10 @@ const respHeaders = {
 const url = "https://us-west-2.cdn.hygraph.com/content/clt9ua1uu25rb07uzgwllv5zu/master";
 const buildsByAppsGQL = {
   query: `
-    query MyQuery {
+    query BuildsByApps {
       applications(where: {isForTest: false}, orderBy: name_ASC) {
         name
+        categories
         source
         builds(orderBy: publishedAt_DESC, first: 5) {
           distribution
@@ -25,9 +26,9 @@ const buildsByAppsGQL = {
 
 const allTagsGQL = {
   query: `
-    query MyQuery {
-      applications(where: {isForTest: false}, orderBy: name_ASC) {
-        name
+    query AllTags {
+      applications(where: {isForTest: false}, orderBy: categories_ASC) {
+        categories
       }
     }
     `,
@@ -92,16 +93,24 @@ async function handleRequest(request) {
       <td><a href="https://download-lxc-images.soubilabs.xyz/${buildIdRoot}">${buildIdRoot}</a> | <a href="https://download-lxc-images.soubilabs.xyz/${buildIdMeta}">metadata</a></td>
       <td>${formattedDate}_${formattedTime}</td>
       <td>~${build.size}B</td>
+      <td>${app.categories.join(', ')}</td>
       </tr>
       `;
     });
   })
 
-  let tags = ``
-
+  let categories = []
   allTagsJsonData.data.applications.forEach(app => {
+    app.categories.forEach(category => {
+      categories.push(category);
+    })
+  })
+  
+  let tags = ``
+  uniqCategories = [...new Set(categories)];
+  uniqCategories.forEach(uniqCategory => {
     tags = tags + `
-    <label class="checkbox-button"><input type="checkbox" name="tags" value="${app.name}" class="tag-filter">${app.name}</label>
+    <label class="checkbox-button"><input type="checkbox" name="tags" value="${uniqCategory}" class="tag-filter">${uniqCategory}</label>
     `;
   })
 
@@ -288,7 +297,10 @@ async function handleRequest(request) {
 
     const table = new DataTable('#buildsTable',
       {
-        columnDefs: [{ visible: false, targets: groupColumn }],
+        columnDefs: [
+          { visible: false, targets: groupColumn },
+          { visible: false, targets: 7 }
+        ],
         order: [[groupColumn, 'asc']],
         responsive: true,
         fixedHeader: true,
@@ -324,7 +336,7 @@ async function handleRequest(request) {
           allTags.parentElement.classList.add('checked');
         }
 
-        table.column(1).search(function (d) {
+        table.column(7).search(function (d) {
           if (tagInput.value != 'all-tags' && tagsInputsSelected.length !== 0) {
             return tagsInputsSelected.some(value => d.includes(value))
           } else {
