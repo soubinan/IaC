@@ -10,7 +10,7 @@ const buildsByAppsGQL = {
         name
         categories
         source
-        builds(orderBy: publishedAt_DESC, first: 5) {
+        builds(orderBy: publishedAt_DESC, first: 3) {
           distribution
           distRelease
           architecture
@@ -110,7 +110,7 @@ async function handleRequest(request) {
   uniqCategories = [...new Set(categories)];
   uniqCategories.forEach(uniqCategory => {
     tags = tags + `
-    <label class="checkbox-button"><input type="checkbox" name="tags" value="${uniqCategory}" class="tag-filter">${uniqCategory}</label>
+    <label class="checkbox-button"><input type="checkbox" name="tags" value="${uniqCategory}" class="tag-filter">${toTitleCase(uniqCategory)}</label>
     `;
   })
 
@@ -131,7 +131,7 @@ async function handleRequest(request) {
 
     <style>
       body {
-        color: #2c2c2c;
+        color: #000;
         background-color: #F7EEDD;
         font-size: 1em;
       }
@@ -193,11 +193,12 @@ async function handleRequest(request) {
         min-width: 30px;
         text-align: center;
         font-size: 0.7em;
+        margin: 1px;
       }
 
       label.checked {
         background-color: #8B4513;
-        color: white;
+        color: #F7EEDD;
         font-weight: bold;
         font-size: 0.9em;
         border-color: #8B4513;
@@ -246,26 +247,26 @@ async function handleRequest(request) {
   <body>
   <a id="back-to-top"></a>
   <div id="container">
-    <h1>The HomeLab's Custom Linux Containers Inventory</h1>
+    <h1>A Customized Linux Containers Inventory</h1>
     <p><i>An actively maintained listing of customized LXC images</i></p>
     <article id="intro">
       <p>
-      This domain lists many LXC images built for use on Proxmox based Homelabs (or any other environments supporting LXCs).<br>
+      This domain lists many LXC images built for use on Proxmox Virtual Environments (or any other environments supporting LXCs).<br>
       Lets avoid <strong>over-containerization</strong> (Docker/Postman in LXC) and <strong>over-virtualization</strong> (Docker/Postman on vms) and simply use native LXCs instead.<br>
       All images available here are generated using <a href="https://linuxcontainers.org/distrobuilder/docs/latest" target="blank">distrobuilder</a> along with dedicated <a target="blank" href="https://github.com/soubinan/homelab-lxc/tree/dev/templates">YAML definitions files</a>.<br>
-      The build themselves can be seen in the <a target="blank" href="https://github.com/soubinan/homelab-lxc/actions">repo's Github actions</a>.<br>
-      Images are generated as builds artifacts and the related links shared on this page.<br>
-      This is first of all a personal project built for my own needs, then shared because it could help someone else (hopefully..).<br>
+      The build themselves can be seen in <a target="blank" href="https://github.com/soubinan/homelab-lxc/actions">this project repo's actions</a>.<br>
+      Images are generated and shared in an object store and the related links shared on this page.<br>
+      This started as a personal project built for my own needs, then shared because it could help someone else (hopefully..).<br>
       <br>
       <i>At most 3 last versions are listed for each application.</i>
       </p>
-      <img src="https://linuxcontainers.org/static/img/containers.svg" alt="Linux Container Logo" width="300" height="300" style="border: none;">
+      <img src="https://linuxcontainers.org/static/img/containers.svg" alt="Linux Container Logo" max-width="300" max-height="300" style="border: none;">
     </article>
     <p>
-    Unfortunately public storage and hosting are not free, so if you find those images useful, please consider <a target="blank" href="https://github.com/sponsors/soubinan">to be a sponsor</a> to help maintain this project alive or simply give a star to <a href="https://github.com/soubinan/homelab-lxc" target="blank">this project's repo</a>.
+    Unfortunately public storage and hosting are not free, If you like this initiative please consider <a target="blank" href="https://github.com/sponsors/soubinan">to be a sponsor</a> to help maintain this project alive or simply give a star to <a href="https://github.com/soubinan/homelab-lxc" target="blank">this project's repo</a>.
     </p>
     <h2>Available images</h2>
-    <p>Your favorite application is missing ? <a href="https://github.com/soubinan/homelab-lxc/issues/new">please open an issue</a>, I will try to add it as soon as possible, or you can simply contribute to the project as well.</p>
+    <p>Your favorite application is missing ? <a href="https://github.com/soubinan/homelab-lxc/issues/new">please open an issue</a> with the required details and I will try to add it as soon as possible, or you can simply add it by yourself, it is pretty easy to do.</p>
     <form>
       Categories:
       <label class="checkbox-button checked"><input type="checkbox" name="tags" value="all-tags" checked id="all-tags" class="tag-filter">All</label>
