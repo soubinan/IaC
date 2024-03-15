@@ -8,6 +8,7 @@ const buildsByAppsGQL = {
     query BuildsByApps {
       applications(where: {isForTest: false}, orderBy: name_ASC) {
         name
+        description
         categories
         source
         builds(orderBy: publishedAt_DESC, first: 3) {
@@ -86,7 +87,7 @@ async function handleRequest(request) {
 
       rows = rows + `
       <tr>
-      <td><a target="blank" href="${app.source}">${toTitleCase(app.name)}</a></td>
+      <td><a target="blank" href="${app.source}" data-tooltip="${app.description}" data-position="bottom" class="bottom">${toTitleCase(app.name)}</a></td>
       <td>${build.version}</td>
       <td>${toTitleCase(build.distribution)} <i>${build.distRelease}</i></td>
       <td>${build.architecture}</td>
@@ -130,10 +131,22 @@ async function handleRequest(request) {
     
 
     <style>
+      :root {
+        --background: #F7EEDD;
+        --text: #000;
+        --primary: #8F1E00;
+        --secondary: #8B4513;
+      }
+
+      * {
+        margin: 0px;
+        padding: 0px;
+        box-sizing: border-box;
+      }
       body {
-        color: #000;
-        background-color: #F7EEDD;
-        font-size: 1em;
+        color: var(--txt);
+        background-color: var(--background);
+        font-size: 1rem;
       }
       #container {
         width: 95%;
@@ -157,10 +170,10 @@ async function handleRequest(request) {
       }
 
       h1, h2, h3 {
-        color: #8f1e00
+        color: var(--primary);
       }
       a {
-        color: #8B4513;
+        color: var(--secondary);
       }
       i {
         margin-top: 15px;
@@ -172,7 +185,7 @@ async function handleRequest(request) {
       p, img {
         margin-right: 15px;
       }
-      tr {
+      tbody tr {
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -186,27 +199,91 @@ async function handleRequest(request) {
         display: inline-block;
         padding: 5px 5px;
         background-color: #transparent;
-        color: #8B4513;
-        border: 1px solid #8B4513;
+        color: var(--secondary);
+        border: 1px solid var(--secondary);
         border-radius: 5px;
         cursor: pointer;
         min-width: 30px;
         text-align: center;
         font-size: 0.7em;
+        vertical-align: middle;
         margin: 1px;
+        transition: background-color 200ms cubic-bezier(.4, 0, .23, 1);
+        transition: font-size 250ms ease;
       }
 
       label.checked {
-        background-color: #8B4513;
-        color: #F7EEDD;
+        background-color: var(--secondary);
+        color: var(--background);
         font-weight: bold;
         font-size: 0.9em;
-        border-color: #8B4513;
+        border-color: var(--secondary);
+        transition: background-color 200ms cubic-bezier(.4, 0, .23, 1);
+        transition: font-size 250ms cubic-bezier(.4, 0, .23, 1);
+      }
+
+      a[data-tooltip].bottom:before, a[data-tooltip].bottom:after {
+        transform: translateY(-10px);
+      }
+
+      a[data-tooltip].bottom:hover:after, a[data-tooltip].bottom:hover:before {
+        transform: translateY(0px);
+      }
+      
+      a[data-tooltip] {
+        position: relative;
+      }
+      
+      a[data-tooltip]:after, a[data-tooltip]:before {
+        position: absolute;
+        visibility: hidden;
+        opacity: 0;
+        transition: transform 200ms ease, opacity 200ms;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        z-index: 99;
+      }
+      
+      a[data-tooltip]:before {
+        content: attr(data-tooltip);
+        background: #000;
+        color: var(--background);
+        font-size: 0.9rem;
+        padding: 10px 15px;
+        border-radius: 5px;
+        text-decoration: none;
+        letter-spacing: 1px;
+      }
+      
+      a[data-tooltip]:after {
+        width: 0;
+        height: 0;
+        border: 6px solid transparent;
+        content: '';
+      }
+      
+      a[data-tooltip]:hover:after, a[data-tooltip]:hover:before {
+        visibility: visible;
+        opacity: 0.75;
+        transform: translateY(0px);
+      }
+      
+      a[data-tooltip][data-position="bottom"]:before {
+        top: 100%;
+        left: -10px;
+        margin-top: 10px;
+      }
+      
+      a[data-tooltip][data-position="bottom"]:after {
+        border-bottom-color: #000;
+        border-top: none;
+        top: 100%;
+        left: 0px;
+        margin-top: 4px;
       }
 
       #back-to-top {
         // display: inline-block;
-        background-color: #8B4513;
+        background-color: var(--secondary);
         width: 50px;
         height: 50px;
         text-align: center;
@@ -225,17 +302,17 @@ async function handleRequest(request) {
         -webkit-font-smoothing: antialiased;
         font: var(--fa-font-solid);
         content: "\\f106";
-        color: #F7EEDD;
+        color: var(--background);
         font-size: 2em;
         font-style: normal;
         line-height: 50px;
       }
       #back-to-top:hover {
         cursor: pointer;
-        background-color: #8f1e00;
+        background-color: var(--primary);
       }
       #back-to-top:active {
-        background-color: #F7EEDD;
+        background-color: var(--background);
       }
       #back-to-top.show {
         opacity: 1;
@@ -282,6 +359,7 @@ async function handleRequest(request) {
           <th>Download</th>
           <th style="max-width:15%">Build Date</th>
           <th style="max-width:8%">Size</th>
+          <th>Categories</th>
         </tr>
       </thead>
       <tbody>
@@ -302,7 +380,10 @@ async function handleRequest(request) {
           { visible: false, targets: groupColumn },
           { visible: false, targets: 7 }
         ],
-        order: [[groupColumn, 'asc']],
+        order: [
+          [groupColumn, 'asc'],
+          [1, 'asc']
+        ],
         responsive: true,
         fixedHeader: true,
         paging: false,
@@ -338,7 +419,7 @@ async function handleRequest(request) {
         }
 
         table.column(7).search(function (d) {
-          if (tagInput.value != 'all-tags' && tagsInputsSelected.length !== 0) {
+          if (tagsInputsSelected.length !== 0 && !tagsInputsSelected.includes('all-tags')) {
             return tagsInputsSelected.some(value => d.includes(value))
           } else {
             return true;
