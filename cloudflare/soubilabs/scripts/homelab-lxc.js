@@ -82,16 +82,15 @@ async function handleRequest(request) {
       const isoDate = dateObj.toISOString();
       const formattedDate = isoDate.substring(0, 10);
       const formattedTime = isoDate.substring(11, 16);
-      const buildIdMeta = (build.buildId).replace(".tar.xz", "-meta.tar.xz");
-      const buildIdRoot = (build.buildId).replace(".tar.xz", "-root.tar.xz");
+      const buildIdMeta = `${build.buildId}-meta.tar.xz`;
+      const buildIdRoot = `${build.buildId}-root.tar.xz`;
 
       rows = rows + `
       <tr>
       <td><a target="blank" href="${app.source}" data-tooltip="${app.description}" data-position="bottom" class="bottom">${toTitleCase(app.name)}</a></td>
-      <td>${build.version}</td>
-      <td>${toTitleCase(build.distribution)} <i>${build.distRelease}</i></td>
-      <td>${build.architecture}</td>
+      <td>${build.buildId}</td>
       <td><a href="https://download-lxc-images.soubilabs.xyz/${buildIdRoot}">${buildIdRoot}</a> | <a href="https://download-lxc-images.soubilabs.xyz/${buildIdMeta}">metadata</a></td>
+      <td>${toTitleCase(build.distribution)} <i>${build.distRelease}</i> - ${build.architecture}</td>
       <td>${formattedDate}_${formattedTime}</td>
       <td>~${build.size}B</td>
       <td>${app.categories.join(', ')}</td>
@@ -143,19 +142,51 @@ async function handleRequest(request) {
         padding: 0px;
         box-sizing: border-box;
       }
+
       body {
         color: var(--txt);
         background-color: var(--background);
         font-size: 1rem;
+        overflow-x: auto;
+        overflow-y: scroll;
+        padding: 5px;
       }
       #container {
         width: 95%;
         max-width: 1440px;
+        min-width: 640px;
         margin: auto;
         padding: 1%;
       }
       footer {
         margin-top: 50px;
+      }
+
+      /* WebKit */
+      ::-webkit-scrollbar {
+          width: 3px;
+      }
+  
+      ::-webkit-scrollbar-track {
+          background: var(--background);
+      }
+  
+      ::-webkit-scrollbar-thumb {
+          background: var(--secondary);
+      }
+  
+      ::-webkit-scrollbar-thumb:hover {
+          background: var(--text);
+      }
+  
+      /* Firefox */
+      scrollbar-width: thin;
+      scrollbar-color: var(--secondary) var(--primary);
+  
+      /* Standard */
+      body {
+        scrollbar-width: thin;
+        scrollbar-color: var(--secondary) var(--primary);
       }
 
       #intro {
@@ -205,7 +236,7 @@ async function handleRequest(request) {
         cursor: pointer;
         min-width: 30px;
         text-align: center;
-        font-size: 0.7em;
+        font-size: .7em;
         vertical-align: middle;
         margin: 1px;
         transition: background-color 200ms cubic-bezier(.4, 0, .23, 1);
@@ -216,7 +247,7 @@ async function handleRequest(request) {
         background-color: var(--secondary);
         color: var(--background);
         font-weight: bold;
-        font-size: 0.9em;
+        font-size: .9em;
         border-color: var(--secondary);
         transition: background-color 200ms cubic-bezier(.4, 0, .23, 1);
         transition: font-size 250ms cubic-bezier(.4, 0, .23, 1);
@@ -239,7 +270,7 @@ async function handleRequest(request) {
         visibility: hidden;
         opacity: 0;
         transition: transform 200ms ease, opacity 200ms;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 0 10px rgba(0, 0, 0, .3);
         z-index: 99;
       }
       
@@ -247,7 +278,7 @@ async function handleRequest(request) {
         content: attr(data-tooltip);
         background: #000;
         color: var(--background);
-        font-size: 0.9rem;
+        font-size: .9rem;
         padding: 10px 15px;
         border-radius: 5px;
         text-decoration: none;
@@ -263,7 +294,7 @@ async function handleRequest(request) {
       
       a[data-tooltip]:hover:after, a[data-tooltip]:hover:before {
         visibility: visible;
-        opacity: 0.75;
+        opacity: .75;
         transform: translateY(0px);
       }
       
@@ -345,18 +376,16 @@ async function handleRequest(request) {
     <h2>Available images</h2>
     <p>Your favorite application is missing ? <a href="https://github.com/soubinan/homelab-lxc/issues/new">please open an issue</a> with the required details and I will try to add it as soon as possible, or you can simply add it by yourself, it is pretty easy to do.</p>
     <form>
-      Categories:
-      <label class="checkbox-button checked"><input type="checkbox" name="tags" value="all-tags" checked id="all-tags" class="tag-filter">All</label>
+      <label class="checkbox-button checked"><input type="checkbox" name="tags" value="all-tags" checked id="all-tags" class="tag-filter">All categories</label>
       ${tags}
     </form>
     <table id="buildsTable" class="display compact" style="width:100%">
       <thead>
         <tr>
-          <th>Group</th>
-          <th style="max-width:15%">Application</th>
+          <th>Row Group</th>
+          <th>Name</th>
+          <th>Links</th>
           <th style="max-width:15%">Distribution</th>
-          <th style="max-width:10%">Architecture</th>
-          <th>Download</th>
           <th style="max-width:15%">Build Date</th>
           <th style="max-width:8%">Size</th>
           <th>Categories</th>
@@ -372,13 +401,14 @@ async function handleRequest(request) {
   </div>
 
   <script>
-    let groupColumn = 0;
+    const groupColumn = 0;
+    const CategoriesCol = 6;
 
     const table = new DataTable('#buildsTable',
       {
         columnDefs: [
           { visible: false, targets: groupColumn },
-          { visible: false, targets: 7 }
+          { visible: false, targets: CategoriesCol }
         ],
         order: [
           [groupColumn, 'asc'],
@@ -418,7 +448,7 @@ async function handleRequest(request) {
           allTags.parentElement.classList.add('checked');
         }
 
-        table.column(7).search(function (d) {
+        table.column(CategoriesCol).search(function (d) {
           if (tagsInputsSelected.length !== 0 && !tagsInputsSelected.includes('all-tags')) {
             return tagsInputsSelected.some(value => d.includes(value))
           } else {
