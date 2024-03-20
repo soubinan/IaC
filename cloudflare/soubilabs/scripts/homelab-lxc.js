@@ -374,7 +374,8 @@ async function handleRequest(request) {
     Unfortunately public storage and hosting are not free, If you like this initiative please consider <a target="blank" href="https://github.com/sponsors/soubinan">to be a sponsor</a> to help maintain this project alive or simply give a star to <a href="https://github.com/soubinan/homelab-lxc" target="blank">this project's repo</a>.
     </p>
     <h2>Available images</h2>
-    <p>Your favorite application is missing ? <a href="https://github.com/soubinan/homelab-lxc/issues/new">please open an issue</a> with the required details and I will try to add it as soon as possible, or you can simply add it by yourself, it is pretty easy to do.</p>
+    <p>Your favorite application is missing ? <a href="https://github.com/soubinan/homelab-lxc/issues/new?assignees=&labels=&projects=&template=new-application-request.md&title=Add+%3Capplication_name%3E+template">please open an issue</a> with the required details and I will try to add it as soon as possible, or you can simply add it by yourself, it is pretty easy to do.</p>
+    <p>Any issue related to an image I packaged ? <a href="https://github.com/soubinan/homelab-lxc/issues/new/choose">Thanks to share it</a>.</p>
     <form>
       <label class="checkbox-button checked"><input type="checkbox" name="tags" value="all-tags" checked id="all-tags" class="tag-filter">All categories</label>
       ${tags}
