@@ -283,6 +283,8 @@ async function handleRequest(request) {
         border-radius: 5px;
         text-decoration: none;
         letter-spacing: 1px;
+        width: 480px;
+        text-wrap: wrap;
       }
       
       a[data-tooltip]:after {
