@@ -368,7 +368,7 @@ async function handleRequest(request) {
       Images are generated and shared in an object store and the related links shared on this page.<br>
       This started as a personal project built for my own needs, then shared because it could help someone else (hopefully..).<br>
       <br>
-      <i>At most 3 last versions are listed for each application.</i>
+      <i>At most the 03 last versions and at least only the latest version are listed for each application's build.</i>
       </p>
       <img src="https://linuxcontainers.org/static/img/containers.svg" alt="Linux Container Logo" max-width="300" max-height="300" style="border: none;">
     </article>
