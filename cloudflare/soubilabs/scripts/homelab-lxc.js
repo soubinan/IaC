@@ -6,7 +6,7 @@ const url = "https://us-west-2.cdn.hygraph.com/content/clt9ua1uu25rb07uzgwllv5zu
 const buildsByAppsGQL = {
   query: `
     query BuildsByApps {
-      applications(where: {isForTest: false}, orderBy: name_ASC) {
+      applications(where: {isForTest: false}, orderBy: name_ASC, first: 50) {
         name
         description
         categories
@@ -28,7 +28,7 @@ const buildsByAppsGQL = {
 const allTagsGQL = {
   query: `
     query AllTags {
-      applications(where: {isForTest: false}, orderBy: categories_ASC) {
+      applications(where: {isForTest: false}, orderBy: categories_ASC, first: 50) {
         categories
       }
     }
