@@ -386,12 +386,12 @@ async function handleRequest(request) {
       <thead>
         <tr>
           <th>Row Group</th>
-          <th>Name</th>
+          <th style="min-width:15%">Name</th>
           <th>Links</th>
           <th style="max-width:15%">Distribution</th>
           <th style="max-width:15%">Build Date</th>
           <th style="max-width:8%">Size</th>
-          <th>Categories</th>
+          <th style="width:0">Categories</th>
         </tr>
       </thead>
       <tbody>
@@ -418,7 +418,7 @@ async function handleRequest(request) {
           [1, 'asc']
         ],
         responsive: true,
-        fixedHeader: true,
+        fixedHeader: false,
         paging: false,
         rowGroup: true,
         ordering: false
