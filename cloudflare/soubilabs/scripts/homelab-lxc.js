@@ -95,23 +95,20 @@ async function downloadLatestVersion(latestBuildId) {
 
   let suffix = "meta.tar.xz";
 
-  if (latestBuildId.includes('-root')) {
+  if (latestBuildId.endsWith('-root')) {
     suffix = "root.tar.xz";
   }
 
-  console.log(app_name, latestBuildJsonData);
   const buildId = latestBuildJsonData.data.application.builds[0].buildId
 
   return `https://download-lxc-images.soubilabs.xyz/${buildId}-${suffix}`;
 }
 
 async function handleRequest(request) {
-
   const reqUrl = new URL(request.url)
   const latestBuildId = reqUrl.pathname.split("/").pop();
 
   if (reqUrl.pathname.includes("/downloads")) {
-    console.log('we are here', latestBuildId);
     const downloadLink = await downloadLatestVersion(latestBuildId);
 
     return Response.redirect(downloadLink, 301)
