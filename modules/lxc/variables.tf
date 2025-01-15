@@ -29,6 +29,11 @@ variable "lxc_image" {
   })
 }
 
+variable "save_image_as" {
+  type    = string
+  default = null
+}
+
 variable "network_dns_list" {
   type = list(string)
 }

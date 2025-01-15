@@ -24,7 +24,7 @@ locals {
 resource "proxmox_virtual_environment_download_file" "lxc_image" {
   content_type        = "vztmpl"
   url                 = var.lxc_image.image_url
-  file_name           = "${var.name}.tar.xz"
+  file_name           = coalesce(var.save_image_as, "${var.name}.tar.xz")
   node_name           = var.lxc_image.dst_targeted_node
   datastore_id        = var.lxc_image.dst_datastore_id
   overwrite           = var.lxc_image.overwrite
