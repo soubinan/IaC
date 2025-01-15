@@ -1,0 +1,60 @@
+---
+- name: Waiting for host readiness
+  hosts: all
+  gather_facts: false
+  remote_user: root
+  vars:
+    ansible_ssh_common_args: "-o StrictHostKeyChecking=no"
+  tasks:
+    - name: Wait for target connection to become reachable/usable
+      ansible.builtin.wait_for_connection:
+
+- name: Configure Homarr Dashboard
+  hosts: all
+  remote_user: root
+  vars:
+    ansible_ssh_common_args: "-o StrictHostKeyChecking=no"
+
+  tasks:
+    - name: Update packages
+      ansible.builtin.apt:
+        upgrade: yes
+        update_cache: yes
+        cache_valid_time: 86400
+
+    - name: Check auto-login is configured
+      ansible.builtin.stat:
+        path: /etc/systemd/system/container-getty@1.service.d/override.conf
+      register: _auto_login_config
+      changed_when: false
+      failed_when: false
+
+    - name: Setup auto-login
+      block:
+        - name: Ensure override conf directory exists
+          ansible.builtin.file:
+            path: /etc/systemd/system/container-getty@1.service.d
+            state: directory
+            mode: 0755
+
+        - name: Enable auto-login
+          ansible.builtin.copy:
+            dest: /etc/systemd/system/container-getty@1.service.d/override.conf
+            content: |
+              [Service]
+              ExecStart=
+              ExecStart=-/sbin/agetty --autologin root --noclear --keep-baud tty%I 115200,38400,9600 \$TERM
+            mode: 0440
+
+        - name: Daemon reload
+          ansible.builtin.systemd_service:
+            daemon_reload: true
+
+        - name: Restart Synchronization timer
+          ansible.builtin.systemd_service:
+            enabled: true
+            name: container-getty@1
+            state: restarted
+
+      when: not _auto_login_config.stat.exists
+...
