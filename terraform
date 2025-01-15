@@ -1,0 +1,10 @@
+#!/bin/bash
+
+CWD=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
+
+# .env should contain the required credentials
+set -a
+. ${CWD}/.env
+set +a
+
+terraform $@
