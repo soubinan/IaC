@@ -1,0 +1,156 @@
+---
+- name: Waiting for host readiness
+  hosts: all
+  gather_facts: false
+  remote_user: root
+  vars:
+    ansible_ssh_common_args: "-o StrictHostKeyChecking=no"
+  tasks:
+    - name: Wait for target connection to become reachable/usable
+      ansible.builtin.wait_for_connection:
+
+- name: Configure Homarr Dashboard
+  hosts: all
+  remote_user: root
+  vars:
+    ansible_ssh_common_args: "-o StrictHostKeyChecking=no"
+    sync_paths:
+      - dst_path: "{{ dst_configs_path }}"
+        src_path: "{{ src_configs_path }}"
+      - dst_path: "{{ dst_data_path }}"
+        src_path: "{{ src_data_path }}"
+      - dst_path: "{{ dst_icons_path }}"
+        src_path: "{{ src_icons_path }}"
+  tasks:
+    - name: Update packages
+      ansible.builtin.apt:
+        upgrade: yes
+        update_cache: yes
+        cache_valid_time: 86400
+
+    - name: Check auto-login is configured
+      ansible.builtin.stat:
+        path: /etc/systemd/system/container-getty@1.service.d/override.conf
+      register: _auto_login_config
+      changed_when: false
+      failed_when: false
+
+    - name: Setup auto-login
+      block:
+        - name: Ensure override conf directory exists
+          ansible.builtin.file:
+            path: /etc/systemd/system/container-getty@1.service.d
+            state: directory
+            mode: 0755
+
+        - name: Enable auto-login
+          ansible.builtin.copy:
+            dest: /etc/systemd/system/container-getty@1.service.d/override.conf
+            content: |
+              [Service]
+              ExecStart=
+              ExecStart=-/sbin/agetty --autologin root --noclear --keep-baud tty%I 115200,38400,9600 \$TERM
+            mode: 0440
+
+        - name: Daemon reload
+          ansible.builtin.systemd_service:
+            daemon_reload: true
+
+        - name: Restart Synchronization timer
+          ansible.builtin.systemd_service:
+            enabled: true
+            name: container-getty@1
+            state: restarted
+
+      when: not _auto_login_config.stat.exists
+
+    - name: Check RClone is installed
+      ansible.builtin.command: rclone -h
+      register: _rclone_presence_check
+      changed_when: false
+      failed_when: false
+
+    - name: Install RClone
+      block:
+        - name: Get RClone version
+          ansible.builtin.uri:
+            url: https://downloads.rclone.org/version.txt
+            return_content: true
+          register: _rclone_version
+
+        - name: Download RClone package
+          ansible.builtin.get_url:
+            url: https://downloads.rclone.org/{{ _rclone_version.content | trim | split | last }}/rclone-{{ _rclone_version.content | trim | split | last }}-linux-amd64.deb
+            dest: /tmp/rclone.deb
+
+        - name: Install RClone
+          ansible.builtin.apt:
+            deb: /tmp/rclone.deb
+
+      when: _rclone_presence_check.rc > 0
+
+    - name: Setup RClone
+      block:
+        - name: Ensure RClone directory exists
+          ansible.builtin.file:
+            path: ~/.config/rclone
+            state: directory
+            mode: 0755
+
+        - name: Copy config file
+          ansible.builtin.template:
+            src: files/rclone.conf
+            dest: ~/.config/rclone/rclone.conf
+            mode: 0440
+
+        - name: Check diffs
+          ansible.builtin.command: rclone check minio:operations/apps_configs/{{ item.dst_path }} {{ item.src_path }}
+          register: _files_diff_check
+          changed_when: false
+          failed_when: false
+          loop: "{{ sync_paths }}"
+
+        - ansible.builtin.set_fact:
+            files_diff_check: "{{ files_diff_check | default([]) + [{'dst_path': item.item.dst_path, 'src_path': item.item.src_path, 'rc': item.rc}] }}"
+          loop: "{{ _files_diff_check.results }}"
+
+        - name: Retrieve previous configs version
+          ansible.builtin.command: rclone copy minio:operations/apps_configs/{{ item.dst_path }} {{ item.src_path }} --progress
+          loop: "{{ files_diff_check | selectattr('rc', 'gt', 0) | list }}"
+
+        - name: Copy unit files
+          ansible.builtin.template:
+            src: "files/{{ item }}"
+            dest: "/etc/systemd/system/{{ item }}"
+            mode: 0440
+            backup: true
+            force: true
+          loop:
+            - rclone.timer
+            - rclone.service
+
+        - name: Daemon reload
+          ansible.builtin.systemd_service:
+            daemon_reload: true
+
+        - name: Ensure Synchronization service is stopped
+          ansible.builtin.systemd_service:
+            name: rclone.service
+            state: stopped
+
+        - name: Enable Synchronization timer
+          ansible.builtin.systemd_service:
+            enabled: true
+            name: rclone.timer
+            state: restarted
+
+        - name: Wait for synchronization to be completed
+          ansible.builtin.pause:
+            seconds: 10
+
+    - name: Restart Homarr service
+      ansible.builtin.systemd_service:
+        enabled: true
+        name: homarr.service
+        state: restarted
+...
