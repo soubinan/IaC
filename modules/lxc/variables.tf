@@ -2,7 +2,7 @@ variable "targeted_node" {
   type = string
 }
 
-variable "default_suffix" {
+variable "description_suffix" {
   type    = string
   default = "Managed by Terraform"
 }
@@ -18,6 +18,11 @@ variable "tags" {
 
 variable "name" {
   type = string
+}
+
+variable "name_suffix" {
+  type    = string
+  default = ""
 }
 
 variable "lxc_image" {

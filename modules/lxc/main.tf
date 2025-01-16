@@ -13,8 +13,10 @@ terraform {
 }
 
 locals {
-  description   = length(var.description) > 0 ? "${var.description} - ${var.default_suffix}" : var.default_suffix
-  is_privileged = var.enable_nfs || (var.is_privileged && !var.enable_nfs)
+  description_default = upper(var.name)
+  description         = length(var.description) > 0 ? "${var.description} - ${var.description_suffix}" : "${local.description_default} - ${var.description_suffix}"
+  app_name            = length(var.name_suffix) > 0 ? "${var.name}-${var.name_suffix}" : var.name
+  is_privileged       = var.enable_nfs || (var.is_privileged && !var.enable_nfs)
   ansible_extra_vars = merge(
     { app_name = var.name },
     var.ansible_playbook.extra_vars
@@ -38,7 +40,7 @@ resource "proxmox_virtual_environment_container" "lxc_machine" {
   node_name = var.targeted_node
 
   initialization {
-    hostname = var.name
+    hostname = local.app_name
 
     dns {
       domain  = " "
