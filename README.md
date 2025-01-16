@@ -5,8 +5,10 @@
 ### How to use terraform configurations
 
 Terraform configs present in this project except cloudflare are expected locally.
+
 Cloudflare configurations are executed remotely on the Hashicorp Cloud Platform.
-To run the terraform configurations, use the terraform shell script located in the root of the project.
+
+To run the terraform configurations, use the terraform shell script located in the root of the project (you will need the .env file to be created as a requirement).
 
 ```bash
 # An example of how to run the terraform configuration for homarr
