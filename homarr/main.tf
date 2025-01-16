@@ -22,7 +22,6 @@ module "homarr" {
 
   name          = "homarr"
   targeted_node = local.targeted_node_1
-  description   = "Homarr"
   tags = [
     "tooling",
     "internal",

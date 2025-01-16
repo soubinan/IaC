@@ -22,7 +22,6 @@ module "it-tools" {
 
   name          = "it-tools"
   targeted_node = local.targeted_node_1
-  description   = "IT Tools"
   tags = [
     "tooling",
     "internal",
