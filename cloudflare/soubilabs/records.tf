@@ -61,19 +61,19 @@ resource "cloudflare_record" "soubilabs_mx_3" {
   priority = 48
 }
 
-resource "cloudflare_record" "soubilabs_spf" {
-  zone_id = var.soubilabs_zone_id
-  name    = "@"
-  value   = "v=spf1 include:_spf.mx.cloudflare.net ~all"
-  type    = "TXT"
-}
+# resource "cloudflare_record" "soubilabs_spf" {
+#   zone_id = var.soubilabs_zone_id
+#   name    = "@"
+#   value   = "v=spf1 include:_spf.mx.cloudflare.net ~all"
+#   type    = "TXT"
+# }
 
-resource "cloudflare_record" "soubilabs_spf_www" {
-  zone_id = var.soubilabs_zone_id
-  name    = "www"
-  value   = "v=spf1 include:_spf.mx.cloudflare.net ~all"
-  type    = "TXT"
-}
+# resource "cloudflare_record" "soubilabs_spf_www" {
+#   zone_id = var.soubilabs_zone_id
+#   name    = "www"
+#   value   = "v=spf1 include:_spf.mx.cloudflare.net ~all"
+#   type    = "TXT"
+# }
 
 resource "cloudflare_record" "soubilabs_dkim" {
   zone_id = var.soubilabs_zone_id
@@ -96,18 +96,19 @@ resource "cloudflare_record" "soubilabs_tlsrpt" {
   type    = "TXT"
 }
 
-########## Brevo email sender
+########## Sender email sender
 
-resource "cloudflare_record" "soubilabs_brevocode" {
+resource "cloudflare_record" "sendersrv" {
   zone_id = var.soubilabs_zone_id
-  name    = "@"
-  value   = "brevo-code:7d2cf8515804438cd0a418aca7189afa"
-  type    = "TXT"
+  name    = "sender._domainkey"
+  value   = "dkim.sendersrv.com"
+  type    = "CNAME"
+  proxied = false
 }
 
-resource "cloudflare_record" "soubilabs_brevodkim" {
+resource "cloudflare_record" "soubilabs_sender_spf" {
   zone_id = var.soubilabs_zone_id
-  name    = "mail._domainkey"
-  value   = "k=rsa;p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDeMVIzrCa3T14JsNY0IRv5/2V1/v2itlviLQBwXsa7shBD6TrBkswsFUToPyMRWC9tbR/5ey0nRBH0ZVxp+lsmTxid2Y2z+FApQ6ra2VsXfbJP3HE6wAO0YTVEJt1TmeczhEd2Jiz/fcabIISgXEdSpTYJhb0ct0VJRxcg4c8c7wIDAQAB"
+  name    = "@"
+  value   = "v=spf1 include:_spf.mx.cloudflare.net include:sendersrv.com ~all"
   type    = "TXT"
 }
