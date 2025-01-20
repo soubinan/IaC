@@ -1,7 +1,7 @@
 provider "minio" {
-  minio_server   = var.minio_creds.endpoint
-  minio_user     = var.minio_creds.username
-  minio_password = var.minio_creds.password
+  minio_server   = var.minio_endpoint
+  minio_user     = var.minio_username
+  minio_password = var.minio_password
   minio_ssl      = true
 }
 

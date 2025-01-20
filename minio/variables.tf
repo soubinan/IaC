@@ -3,12 +3,18 @@ variable "suffix" {
   default = "managed by Terraform"
 }
 
-variable "minio_creds" {
-  type = object({
-    endpoint = string
-    username = string
-    password = string
-  })
+variable "minio_endpoint" {
+  type = string
+}
+
+variable "minio_username" {
+  type      = string
+  sensitive = true
+}
+
+variable "minio_password" {
+  type      = string
+  sensitive = true
 }
 
 variable "time_zone" {
