@@ -1,0 +1,10 @@
+[Unit]
+Description=Periodic backup of {{ app_name }} DB
+
+[Timer]
+OnBootSec=300seconds
+OnUnitActiveSec=600seconds
+Unit=pg-dump.service
+
+[Install]
+WantedBy=multi-user.target

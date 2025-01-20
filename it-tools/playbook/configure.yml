@@ -9,7 +9,7 @@
     - name: Wait for target connection to become reachable/usable
       ansible.builtin.wait_for_connection:
 
-- name: Configure Homarr Dashboard
+- name: Configure
   hosts: all
   remote_user: root
   vars:

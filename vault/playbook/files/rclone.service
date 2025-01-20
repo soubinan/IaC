@@ -1,0 +1,13 @@
+[Unit]
+Description=RClone
+After=network.target network-online.target
+{% for i in sync_paths %}
+ConditionPathExists={{ i.src_path }}
+{% endfor %}
+
+[Service]
+Type=oneshot
+Environment=HOME=/root
+{% for i in sync_paths %}
+ExecStart=/usr/bin/rclone sync {{ i.src_path }} minio:operations/apps_configs/{{ i.dst_path }} --checksum --metadata --progress
+{% endfor %}

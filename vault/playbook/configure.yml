@@ -19,8 +19,8 @@
         src_path: "{{ src_configs_path }}"
       - dst_path: "{{ dst_data_path }}"
         src_path: "{{ src_data_path }}"
-      - dst_path: "{{ dst_icons_path }}"
-        src_path: "{{ src_icons_path }}"
+      - dst_path: "{{ dst_var_path }}"
+        src_path: "{{ src_var_path }}"
   tasks:
     - name: Update packages
       ansible.builtin.apt:

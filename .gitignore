@@ -34,7 +34,7 @@ override.tf.json
 terraform.rc
 
 # Ignore credentials/env file
-.creds.tf
+.creds*
 .env
 
 # Ignore wrangler dev files and directories
@@ -42,3 +42,6 @@ terraform.rc
 wrangler.toml
 .wrangler/
 node_modules/
+
+# Ignore RUNME versioned markdown
+*-*.md

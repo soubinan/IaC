@@ -1,0 +1,10 @@
+[Unit]
+Description=Periodic synchronization of {{ app_name }} configs
+
+[Timer]
+OnBootSec=90seconds
+OnUnitActiveSec=30seconds
+Unit=rclone.service
+
+[Install]
+WantedBy=multi-user.target

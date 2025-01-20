@@ -15,12 +15,8 @@
   vars:
     ansible_ssh_common_args: "-o StrictHostKeyChecking=no"
     sync_paths:
-      - dst_path: "{{ dst_configs_path }}"
-        src_path: "{{ src_configs_path }}"
       - dst_path: "{{ dst_data_path }}"
         src_path: "{{ src_data_path }}"
-      - dst_path: "{{ dst_icons_path }}"
-        src_path: "{{ src_icons_path }}"
   tasks:
     - name: Update packages
       ansible.builtin.apt:
@@ -148,9 +144,79 @@
           ansible.builtin.pause:
             seconds: 10
 
-    - name: Restart service
-      ansible.builtin.systemd_service:
-        enabled: true
-        name: "{{ app_name | lower }}.service"
-        state: restarted
+    - name: Setup PG Dump
+      block:
+        - name: PG dump current DB
+          ansible.builtin.command: pg_dump -Fc --no-acl -h 127.0.0.1 -U zitadel zitadel -f /tmp/db.dump
+
+        - name: Get PG dump current DB size
+          ansible.builtin.stat:
+            path: /tmp/db.dump
+          register: _current_db_dump_size
+          changed_when: false
+
+        - name: Get PG dump bkp DB size
+          ansible.builtin.stat:
+            path: /opt/zitadel/db.dump
+          register: _bkp_db_dump_size
+          failed_when: false
+          changed_when: false
+
+        - name: Restore DB data
+          ansible.builtin.command: |
+            rclone copy minio:operations/apps_configs/zitadel/data /opt/zitadel --progress
+            pg_restore -d zitadel /opt/zitadel/db.dump
+          when: _bkp_db_dump_size.stat.exists and _current_db_dump_size.stat.size < _bkp_db_dump_size.stat.size
+
+        - name: Copy PG dump unit files
+          ansible.builtin.template:
+            src: "files/{{ item }}"
+            dest: "/etc/systemd/system/{{ item }}"
+            mode: 0440
+            backup: true
+            force: true
+          loop:
+            - pg-dump.timer
+            - pg-dump.service
+
+        - name: Enable PG dump timer
+          ansible.builtin.systemd_service:
+            enabled: true
+            name: pg-dump.timer
+            state: restarted
+
+        - name: Daemon reload
+          ansible.builtin.systemd_service:
+            daemon_reload: true
+
+        - name: Ensure PG dump service is stopped
+          ansible.builtin.systemd_service:
+            name: pg-dump.service
+            state: stopped
+
+        - name: Enable PG dump timer
+          ansible.builtin.systemd_service:
+            enabled: true
+            name: pg-dump.timer
+            state: restarted
+
+    - name: Configure Zitadel
+      block:
+        - name: Update env vars
+          ansible.builtin.blockinfile:
+            path: /opt/zitadel/.env
+            block: |
+              ZITADEL_EXTERNALDOMAIN={{ external_domain }}
+              ZITADEL_EXTERNALPORT={{ external_port | default("443") }}
+              ZITADEL_METRICS_TYPE=otel
+              ZITADEL_TRACING_TYPE=otel
+              ZITADEL_TRACING_FRACTION=1.0
+              ZITADEL_TRACING_ENDPOINT=otel.collector.endpoint
+            insertafter: EOF
+
+        - name: Restart service
+          ansible.builtin.systemd_service:
+            enabled: true
+            name: "{{ app_name | lower }}.service"
+            state: restarted
 ...

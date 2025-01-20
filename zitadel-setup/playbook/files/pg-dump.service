@@ -1,0 +1,11 @@
+[Unit]
+Description=PG Dump
+After=network.target network-online.target
+{% for i in sync_paths %}
+ConditionPathExists={{ i.src_path }}
+{% endfor %}
+
+[Service]
+Type=oneshot
+Environment=HOME=/root
+ExecStart=/usr/bin/pg_dump -Fc --no-acl -h 127.0.0.1 -U zitadel zitadel > /opt/zitadel/db.dump
