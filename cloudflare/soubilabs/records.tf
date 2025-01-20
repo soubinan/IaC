@@ -61,19 +61,12 @@ resource "cloudflare_record" "soubilabs_mx_3" {
   priority = 48
 }
 
-# resource "cloudflare_record" "soubilabs_spf" {
-#   zone_id = var.soubilabs_zone_id
-#   name    = "@"
-#   value   = "v=spf1 include:_spf.mx.cloudflare.net ~all"
-#   type    = "TXT"
-# }
-
-# resource "cloudflare_record" "soubilabs_spf_www" {
-#   zone_id = var.soubilabs_zone_id
-#   name    = "www"
-#   value   = "v=spf1 include:_spf.mx.cloudflare.net ~all"
-#   type    = "TXT"
-# }
+resource "cloudflare_record" "soubilabs_spf" {
+  zone_id = var.soubilabs_zone_id
+  name    = "@"
+  value   = "v=spf1 include:_spf.mx.cloudflare.net include:smtp-brevo.com ~all"
+  type    = "TXT"
+}
 
 resource "cloudflare_record" "soubilabs_dkim" {
   zone_id = var.soubilabs_zone_id
@@ -96,19 +89,27 @@ resource "cloudflare_record" "soubilabs_tlsrpt" {
   type    = "TXT"
 }
 
-########## Sender email sender
+########## Brevo email sender
 
-resource "cloudflare_record" "sendersrv" {
+resource "cloudflare_record" "soubilabs_brevo_dkim1" {
   zone_id = var.soubilabs_zone_id
-  name    = "sender._domainkey"
-  value   = "dkim.sendersrv.com"
+  name    = "brevo1._domainkey"
+  value   = "b1.soubilabs-xyz.dkim.brevo.com"
   type    = "CNAME"
   proxied = false
 }
 
-resource "cloudflare_record" "soubilabs_sender_spf" {
+resource "cloudflare_record" "soubilabs_brevo_dkim2" {
+  zone_id = var.soubilabs_zone_id
+  name    = "brevo2._domainkey"
+  value   = "b2.soubilabs-xyz.dkim.brevo.com"
+  type    = "CNAME"
+  proxied = false
+}
+
+resource "cloudflare_record" "soubilabs_brevo_code" {
   zone_id = var.soubilabs_zone_id
   name    = "@"
-  value   = "v=spf1 include:_spf.mx.cloudflare.net include:sendersrv.com ~all"
+  value   = "brevo-code:8e59d23b7258bb35f1dead22434df2c6"
   type    = "TXT"
 }
