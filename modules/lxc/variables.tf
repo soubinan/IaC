@@ -25,6 +25,11 @@ variable "name_suffix" {
   default = ""
 }
 
+variable "template_file_id" {
+  type    = string
+  default = null
+}
+
 variable "lxc_image" {
   type = object({
     image_url         = string,
@@ -32,6 +37,16 @@ variable "lxc_image" {
     dst_datastore_id  = string,
     overwrite         = bool,
   })
+  default = {
+    image_url         = null,
+    dst_targeted_node = null,
+    dst_datastore_id  = null,
+    overwrite         = false,
+  }
+  validation {
+    condition     = (var.lxc_image.image_url != null || var.template_file_id != null)
+    error_message = "Both 'lxc_image' and 'template_file_id' variables cannot be null, provide one of them."
+  }
 }
 
 variable "save_image_as" {

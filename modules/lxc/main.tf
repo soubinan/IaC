@@ -24,6 +24,8 @@ locals {
 }
 
 resource "proxmox_virtual_environment_download_file" "lxc_image" {
+  count = var.lxc_image.image_url == null ? 0 : 1
+
   content_type        = "vztmpl"
   url                 = var.lxc_image.image_url
   file_name           = coalesce(var.save_image_as, "${var.name}.tar.xz")
@@ -84,7 +86,7 @@ resource "proxmox_virtual_environment_container" "lxc_machine" {
   }
 
   operating_system {
-    template_file_id = proxmox_virtual_environment_download_file.lxc_image.id
+    template_file_id = var.template_file_id != null ? var.template_file_id : proxmox_virtual_environment_download_file.lxc_image[0].id
     type             = var.os_type
   }
 
