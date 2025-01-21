@@ -523,3 +523,56 @@ module "jellyseerr" {
     },
   }
 }
+
+module "recyclarr" {
+  source = "../modules/lxc"
+
+  providers = {
+    proxmox = proxmox
+  }
+
+  root_password  = var.usr_pwd
+  ssh_public_key = local.ssh_public_key
+
+  name          = "recylarr"
+  targeted_node = local.targeted_node_1
+  description   = "SERVARR"
+  tags = [
+    "internal",
+    "services",
+  ]
+
+  network_dns_list = [local.network_gateway]
+
+  ip_configs = [
+    {
+      ip      = "192.168.100.39"
+      prefix  = 25
+      gateway = local.network_gateway
+    }
+  ]
+
+  template_file_id = "local:vztmpl/debian-12-standard_12.7-1_amd64.tar.zst"
+
+  assigned_cores  = 1
+  assigned_memory = 1024
+  assigned_swap   = 512
+
+  disks = [{
+    datastore_id = "local-lvm"
+    size         = 4
+  }]
+
+  # ansible_playbook = {
+  #   path              = "./playbook/configure.yml"
+  #   is_replayable     = true
+  #   disable_ssh_check = true
+  #   extra_vars = {
+  #     minio_access_key_id     = var.minio_ops_ak
+  #     minio_secret_access_key = var.minio_ops_sk
+  #     minio_endpoint          = var.minio_endpoint
+  #     src_data_0_path         = "/opt/jellyseerr/config"
+  #     dst_data_0_path         = "jellyseerr/var"
+  #   },
+  # }
+}
