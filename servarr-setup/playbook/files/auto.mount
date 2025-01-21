@@ -1,0 +1,11 @@
+[Unit]
+Description=Auto-mount {{ item.local_path }}
+After=network-online.target
+
+[Mount]
+What={{ nfs_server }}:{{ item.nfs_path }}
+Where={{ item.local_path }}
+Type=nfs
+
+[Install]
+WantedBy=multi-user.target

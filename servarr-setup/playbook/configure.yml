@@ -1,0 +1,196 @@
+---
+- name: Waiting for host readiness
+  hosts: all
+  gather_facts: false
+  remote_user: root
+  vars:
+    ansible_ssh_common_args: "-o StrictHostKeyChecking=no"
+  tasks:
+    - name: Wait for target connection to become reachable/usable
+      ansible.builtin.wait_for_connection:
+
+- name: Configure
+  hosts: all
+  remote_user: root
+  vars:
+    ansible_ssh_common_args: "-o StrictHostKeyChecking=no"
+
+  tasks:
+    - name: Count matching variables
+      ansible.builtin.set_fact:
+        max_index: "{{ vars | dict2items | selectattr('key', 'match', '^src_data_\\d+_path$') | list | length }}"
+
+    - name: Create sync_paths dynamically
+      set_fact:
+        sync_paths: "{{ sync_paths | default([]) + [ { 'dst_path': vars['dst_data_' ~ item ~ '_path'], 'src_path': vars['src_data_' ~ item ~ '_path'] } ] }}"
+      with_sequence: start=0 end="{{ (max_index | int) - 1 }}"
+
+    - name: Update packages
+      ansible.builtin.apt:
+        upgrade: yes
+        update_cache: yes
+        cache_valid_time: 86400
+
+    - name: Install required packages
+      ansible.builtin.apt:
+        pkg:
+          - nfs-common
+          - resolvconf
+        state: present
+        autoremove: true
+
+    - name: Check auto-login is configured
+      ansible.builtin.stat:
+        path: /etc/systemd/system/container-getty@1.service.d/override.conf
+      register: _auto_login_config
+      changed_when: false
+      failed_when: false
+
+    - name: Setup auto-login
+      block:
+        - name: Ensure override conf directory exists
+          ansible.builtin.file:
+            path: /etc/systemd/system/container-getty@1.service.d
+            state: directory
+            mode: 0755
+
+        - name: Enable auto-login
+          ansible.builtin.copy:
+            dest: /etc/systemd/system/container-getty@1.service.d/override.conf
+            content: |
+              [Service]
+              ExecStart=
+              ExecStart=-/sbin/agetty --autologin root --noclear --keep-baud tty%I 115200,38400,9600 \$TERM
+            mode: 0440
+
+        - name: Daemon reload
+          ansible.builtin.systemd_service:
+            daemon_reload: true
+
+        - name: Restart Synchronization timer
+          ansible.builtin.systemd_service:
+            enabled: true
+            name: container-getty@1
+            state: restarted
+
+      when: not _auto_login_config.stat.exists
+
+    - name: Check RClone is installed
+      ansible.builtin.command: rclone -h
+      register: _rclone_presence_check
+      changed_when: false
+      failed_when: false
+
+    - name: Install RClone
+      block:
+        - name: Get RClone version
+          ansible.builtin.uri:
+            url: https://downloads.rclone.org/version.txt
+            return_content: true
+          register: _rclone_version
+
+        - name: Download RClone package
+          ansible.builtin.get_url:
+            url: https://downloads.rclone.org/{{ _rclone_version.content | trim | split | last }}/rclone-{{ _rclone_version.content | trim | split | last }}-linux-amd64.deb
+            dest: /tmp/rclone.deb
+
+        - name: Install RClone
+          ansible.builtin.apt:
+            deb: /tmp/rclone.deb
+
+      when: _rclone_presence_check.rc > 0
+
+    - name: Setup RClone
+      block:
+        - name: Ensure RClone directory exists
+          ansible.builtin.file:
+            path: ~/.config/rclone
+            state: directory
+            mode: 0755
+
+        - name: Copy config file
+          ansible.builtin.template:
+            src: files/rclone.conf
+            dest: ~/.config/rclone/rclone.conf
+            mode: 0440
+
+        - name: Retrieve previous configs version
+          ansible.builtin.command: |
+            rclone copy minio:operations/apps_configs/{{ item.dst_path }} {{ item.src_path }}
+          when: _rclone_presence_check.rc > 0
+          loop: "{{ sync_paths }}"
+
+        - name: Fix ownership
+          ansible.builtin.command: |
+            chown -R {{ app_name | lower }}:{{ app_name | lower }} /var/lib/{{ app_name | lower }}
+          when: item.src_path == "/var/lib/{{ app_name | lower }}"
+          loop: "{{ sync_paths }}"
+
+        - name: Copy unit files
+          ansible.builtin.template:
+            src: "files/{{ item }}"
+            dest: "/etc/systemd/system/{{ item }}"
+            mode: 0440
+            backup: true
+            force: true
+          loop:
+            - rclone.timer
+            - rclone.service
+
+        - name: Daemon reload
+          ansible.builtin.systemd_service:
+            daemon_reload: true
+
+        - name: Ensure Synchronization service is stopped
+          ansible.builtin.systemd_service:
+            name: rclone.service
+            state: stopped
+
+        - name: Enable Synchronization timer
+          ansible.builtin.systemd_service:
+            enabled: true
+            name: rclone.timer
+            state: restarted
+
+        - name: Wait for synchronization to be completed
+          ansible.builtin.pause:
+            seconds: 10
+
+    - name: Configure NFS mount
+      block:
+        - name: Creates mounting directory
+          ansible.builtin.file:
+            path: "{{ local_media_path }}"
+            state: directory
+            mode: '0777'
+
+        - name: Copy mount file
+          ansible.builtin.template:
+            src: files/auto.mount
+            dest: "/etc/systemd/system/{{ item.local_path | replace('/', '-') | regex_replace('^-', '') }}.mount"
+            mode: "0644"
+            backup: true
+            force: true
+          loop:
+            - local_path: "{{ local_media_path }}"
+              nfs_path: "{{ nfs_media_path }}"
+
+        - name: Daemon reload
+          ansible.builtin.systemd_service:
+            daemon_reload: true
+
+        - name: Enable mounts
+          ansible.builtin.systemd_service:
+            enabled: true
+            state: started
+            name: "{{ item | replace('/', '-') | regex_replace('^-', '') }}.mount"
+          loop:
+            - "{{ local_media_path }}"
+      when: local_media_path is defined and nfs_media_path is defined
+
+    - name: Restart Servarr service
+      ansible.builtin.systemd_service:
+        enabled: true
+        name: "{{ app_name }}.service"
+        state: restarted
+...
