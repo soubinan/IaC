@@ -68,7 +68,12 @@ resource "minio_s3_bucket_versioning" "operations_bucket_versioning" {
   bucket = minio_s3_bucket.operations_bucket.bucket
 
   versioning_configuration {
-    status = "Enabled"
+    status          = "Enabled"
+    exclude_folders = true
+
+    excluded_prefixes = [
+      "apps_configs/",
+    ]
   }
 
   depends_on = [
