@@ -1,0 +1,13 @@
+[Unit]
+Description=Recyclarr
+After=network.target network-online.target
+{% for i in configs %}
+ConditionPathExists={{ config_path }}/{{ i }}
+{% endfor %}
+
+[Service]
+Type=oneshot
+{% for i in configs %}
+Environment=HOME={{ config_path }}
+ExecStart=/usr/local/bin/recyclarr sync -c {{ config_path }}/{{ i }}
+{% endfor %}

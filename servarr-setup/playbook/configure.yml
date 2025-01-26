@@ -20,24 +20,27 @@
       ansible.builtin.set_fact:
         max_index: "{{ vars | dict2items | selectattr('key', 'match', '^src_data_\\d+_path$') | list | length }}"
 
+    - name: Check matching variables
+      ansible.builtin.set_fact:
+        has_sync_paths: "{{ max_index | bool }}"
+
     - name: Create sync_paths dynamically
       set_fact:
         sync_paths: "{{ sync_paths | default([]) + [ { 'dst_path': vars['dst_data_' ~ item ~ '_path'], 'src_path': vars['src_data_' ~ item ~ '_path'] } ] }}"
-      with_sequence: start=0 end="{{ (max_index | int) - 1 }}"
+      with_sequence: start=0 end="{{ (max_index | int) - 1 if has_sync_paths else 0 }}"
+      failed_when: false
+      when: has_sync_paths
+
+    - name: Create empty sync_paths
+      set_fact:
+        sync_paths: []
+      failed_when: false
+      when: not has_sync_paths
 
     - name: Update packages
       ansible.builtin.apt:
         upgrade: yes
         update_cache: yes
-        cache_valid_time: 86400
-
-    - name: Install required packages
-      ansible.builtin.apt:
-        pkg:
-          - nfs-common
-          - resolvconf
-        state: present
-        autoremove: true
 
     - name: Check auto-login is configured
       ansible.builtin.stat:
@@ -72,7 +75,6 @@
             enabled: true
             name: container-getty@1
             state: restarted
-
       when: not _auto_login_config.stat.exists
 
     - name: Check RClone is installed
@@ -97,7 +99,6 @@
         - name: Install RClone
           ansible.builtin.apt:
             deb: /tmp/rclone.deb
-
       when: _rclone_presence_check.rc > 0
 
     - name: Setup RClone
@@ -155,9 +156,18 @@
         - name: Wait for synchronization to be completed
           ansible.builtin.pause:
             seconds: 10
+      when: has_sync_paths
 
     - name: Configure NFS mount
       block:
+        - name: Install required packages
+          ansible.builtin.apt:
+            pkg:
+              - nfs-common
+              - resolvconf
+            state: present
+            autoremove: true
+
         - name: Creates mounting directory
           ansible.builtin.file:
             path: "{{ local_media_path }}"
@@ -186,11 +196,92 @@
             name: "{{ item | replace('/', '-') | regex_replace('^-', '') }}.mount"
           loop:
             - "{{ local_media_path }}"
-      when: local_media_path is defined and nfs_media_path is defined
+      when: local_media_path is defined and nfs_media_path is defined and has_sync_paths
+
+    - name: Setup Servarr
+      block:
+        - name: Install required packages
+          ansible.builtin.apt:
+            pkg:
+              - xz-utils
+            state: present
+            autoremove: true
+
+        - name: Download Recyclarr
+          ansible.builtin.get_url:
+            url: "https://github.com/recyclarr/recyclarr/releases/latest/download/recyclarr-linux-x64.tar.xz"
+            dest: /tmp/recyclarr-linux-x64.tar.xz
+            mode: '0777'
+
+        - name: Install Recyclarr
+          ansible.builtin.unarchive:
+            src: /tmp/recyclarr-linux-x64.tar.xz
+            dest: /usr/local/bin
+            remote_src: true
+            mode: '0766'
+
+        - name: Creates Recyclarr directory
+          ansible.builtin.file:
+            path: "{{ item }}"
+            state: directory
+            mode: '0777'
+          loop:
+            - /opt/Recyclarr
+          register: recyclarr_dir
+
+        - name: Copy Recyclarr config file
+          ansible.builtin.template:
+            src: "files/recyclarr.yml"
+            dest: "{{ recyclarr_dir.results[0].path }}/recyclarr.yml"
+            mode: '0644'
+            force: true
+
+        - name: Copy Recyclarr unit files
+          ansible.builtin.template:
+            src: "files/{{ item }}"
+            dest: "/etc/systemd/system/{{ item }}"
+            mode: "0440"
+            backup: true
+            force: true
+          loop:
+            - "recyclarr.timer"
+            - "recyclarr.service"
+          vars:
+            config_path: "{{ recyclarr_dir.results[0].path }}"
+            configs:
+              - recyclarr.yml
+
+        - name: Daemon reload
+          ansible.builtin.systemd_service:
+            daemon_reload: true
+
+        - name: Ensure Recyclarr service is stopped
+          ansible.builtin.systemd_service:
+            name: recyclarr.service
+            state: stopped
+
+        - name: Enable Recyclarr timer
+          ansible.builtin.systemd_service:
+            enabled: true
+            name: recyclarr.timer
+            state: restarted
+
+        - name: Copy homepage config file
+          ansible.builtin.template:
+            src: "files/mafl.yml"
+            dest: "/app/data/config.yml"
+            mode: "6440"
+
+        - name: Restart homepage service
+          ansible.builtin.systemd_service:
+            name: mafl.service
+            state: restarted
+      when: app_name == "servarr"
 
     - name: Restart Servarr service
       ansible.builtin.systemd_service:
         enabled: true
         name: "{{ app_name }}.service"
         state: restarted
+      when: has_sync_paths
 ...

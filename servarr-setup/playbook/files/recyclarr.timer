@@ -1,0 +1,10 @@
+[Unit]
+Description=Periodic synchronization of trash configs
+
+[Timer]
+OnBootSec=90seconds
+OnUnitActiveSec=12hours
+Unit=recyclarr.service
+
+[Install]
+WantedBy=multi-user.target

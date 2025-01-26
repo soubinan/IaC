@@ -1,0 +1,74 @@
+title: Servarr
+theme: dark
+checkUpdates: true
+behaviour:
+  target: _blank
+layout:
+  grid:
+    small: 1
+    medium: 3
+    large: 3
+    xlarge: 3
+services:
+  Default:
+    - title: Radarr Default
+      link: http://{{ radarr_default_ip }}:7878
+      icon:
+        url: https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/svg/radarr.svg
+        wrap: true
+      status:
+        enabled: true
+    - title: Sonarr Default
+      link: http://{{ sonarr_default_ip }}:8989
+      icon:
+        url: https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/svg/sonarr.svg
+        wrap: true
+      status:
+        enabled: true
+    - title: Readarr Default
+      link: http://{{ readarr_default_ip }}:8787
+      icon:
+        url: https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/svg/readarr.svg
+        wrap: true
+      status:
+        enabled: true
+  Anime:
+    - title: Radarr Anime
+      link: http://{{ radarr_anime_ip }}:7878
+      icon:
+        url: https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/svg/radarr.svg
+        wrap: true
+      status:
+        enabled: true
+    - title: Sonarr Anime
+      link: http://{{ sonarr_anime_ip }}:8989
+      icon:
+        url: https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/svg/sonarr.svg
+        wrap: true
+      status:
+        enabled: true
+    - title: Readarr Anime
+      link: http://{{ readarr_anime_ip }}:8787
+      icon:
+        url: https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/svg/readarr.svg
+        wrap: true
+      status:
+        enabled: true
+  Integrations:
+    - type: ip-api
+      options:
+        flagIcon: true
+    - title: QBitTorrent
+      link: https://torrent.lab.soubilabs.xyz
+      icon:
+        url: https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/svg/qbittorrent.svg
+        wrap: true
+      status:
+        enabled: true
+    - title: Prowlarr
+      link: http://{{ prowlarr_ip }}:9696
+      icon:
+        url: https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/svg/prowlarr.svg
+        wrap: true
+      status:
+        enabled: true

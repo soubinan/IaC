@@ -77,6 +77,13 @@ module "radarr-default" {
   }
 }
 
+output "configure_radarr-default_output" {
+  value = {
+    stdout = module.radarr-default.ansible_stdout
+    stderr = module.radarr-default.ansible_stderr
+  }
+}
+
 module "radarr-anime" {
   source = "../modules/lxc"
 
@@ -140,6 +147,13 @@ module "radarr-anime" {
       src_data_1_path         = "/opt/bazarr/data"
       dst_data_1_path         = "radarr/anime/bazarr"
     },
+  }
+}
+
+output "configure_radarr-anime_output" {
+  value = {
+    stdout = module.radarr-anime.ansible_stdout
+    stderr = module.radarr-anime.ansible_stderr
   }
 }
 
@@ -209,6 +223,13 @@ module "sonarr-default" {
   }
 }
 
+output "configure_sonarr-default_output" {
+  value = {
+    stdout = module.sonarr-default.ansible_stdout
+    stderr = module.sonarr-default.ansible_stderr
+  }
+}
+
 module "sonarr-anime" {
   source = "../modules/lxc"
 
@@ -275,6 +296,13 @@ module "sonarr-anime" {
   }
 }
 
+output "configure_sonarr-anime_output" {
+  value = {
+    stdout = module.sonarr-anime.ansible_stdout
+    stderr = module.sonarr-anime.ansible_stderr
+  }
+}
+
 module "readarr-default" {
   source = "../modules/lxc"
 
@@ -336,6 +364,13 @@ module "readarr-default" {
       src_data_0_path         = "/var/lib/readarr"
       dst_data_0_path         = "readarr/default/var"
     },
+  }
+}
+
+output "configure_readarr-default_output" {
+  value = {
+    stdout = module.readarr-default.ansible_stdout
+    stderr = module.readarr-default.ansible_stderr
   }
 }
 
@@ -404,6 +439,13 @@ module "readarr-anime" {
   }
 }
 
+output "configure_readarr-anime_output" {
+  value = {
+    stdout = module.readarr-anime.ansible_stdout
+    stderr = module.readarr-anime.ansible_stderr
+  }
+}
+
 module "prowlarr" {
   source = "../modules/lxc"
 
@@ -461,6 +503,13 @@ module "prowlarr" {
       src_data_0_path         = "/var/lib/prowlarr"
       dst_data_0_path         = "prowlarr/var"
     },
+  }
+}
+
+output "configure_prowlarr_output" {
+  value = {
+    stdout = module.prowlarr.ansible_stdout
+    stderr = module.prowlarr.ansible_stderr
   }
 }
 
@@ -524,7 +573,14 @@ module "jellyseerr" {
   }
 }
 
-module "recyclarr" {
+output "configure_jellyseerr_output" {
+  value = {
+    stdout = module.jellyseerr.ansible_stdout
+    stderr = module.jellyseerr.ansible_stderr
+  }
+}
+
+module "startpage" {
   source = "../modules/lxc"
 
   providers = {
@@ -534,13 +590,20 @@ module "recyclarr" {
   root_password  = var.usr_pwd
   ssh_public_key = local.ssh_public_key
 
-  name          = "recylarr"
+  name          = "servarr"
   targeted_node = local.targeted_node_1
   description   = "SERVARR"
   tags = [
     "internal",
     "services",
   ]
+
+  lxc_image = {
+    image_url         = "https://lxc-images.soubilabs.xyz/downloads/mafl-latest-amd64-root"
+    dst_targeted_node = local.targeted_node_1
+    dst_datastore_id  = "local"
+    overwrite         = true
+  }
 
   network_dns_list = [local.network_gateway]
 
@@ -552,27 +615,34 @@ module "recyclarr" {
     }
   ]
 
-  template_file_id = "local:vztmpl/debian-12-standard_12.7-1_amd64.tar.zst"
-
   assigned_cores  = 1
-  assigned_memory = 1024
-  assigned_swap   = 512
+  assigned_memory = 2048
+  assigned_swap   = 1024
 
   disks = [{
     datastore_id = "local-lvm"
     size         = 4
   }]
 
-  # ansible_playbook = {
-  #   path              = "./playbook/configure.yml"
-  #   is_replayable     = true
-  #   disable_ssh_check = true
-  #   extra_vars = {
-  #     minio_access_key_id     = var.minio_ops_ak
-  #     minio_secret_access_key = var.minio_ops_sk
-  #     minio_endpoint          = var.minio_endpoint
-  #     src_data_0_path         = "/opt/jellyseerr/config"
-  #     dst_data_0_path         = "jellyseerr/var"
-  #   },
-  # }
+  ansible_playbook = {
+    path              = "./playbook/configure.yml"
+    is_replayable     = true
+    disable_ssh_check = true
+    extra_vars = {
+      radarr_default_ip  = length(module.radarr-default.ip_addresses) > 0 ? module.radarr-default.ip_addresses[0] : null
+      radarr_anime_ip    = length(module.radarr-anime.ip_addresses) > 0 ? module.radarr-anime.ip_addresses[0] : null
+      sonarr_default_ip  = length(module.sonarr-default.ip_addresses) > 0 ? module.sonarr-default.ip_addresses[0] : null
+      sonarr_anime_ip    = length(module.sonarr-anime.ip_addresses) > 0 ? module.sonarr-anime.ip_addresses[0] : null
+      readarr_default_ip = length(module.readarr-default.ip_addresses) > 0 ? module.readarr-default.ip_addresses[0] : null
+      readarr_anime_ip   = length(module.readarr-anime.ip_addresses) > 0 ? module.readarr-anime.ip_addresses[0] : null
+      prowlarr_ip        = length(module.prowlarr.ip_addresses) > 0 ? module.prowlarr.ip_addresses[0] : null
+    },
+  }
+}
+
+output "configure_startpage_output" {
+  value = {
+    stdout = module.startpage.ansible_stdout
+    stderr = module.startpage.ansible_stderr
+  }
 }
