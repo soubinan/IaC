@@ -12,21 +12,21 @@ layout:
 services:
   Default:
     - title: Radarr Default
-      link: http://{{ radarr_default_ip }}:7878
+      link: http://{{ radarr_default_ip_port }}
       icon:
         url: https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/svg/radarr.svg
         wrap: true
       status:
         enabled: true
     - title: Sonarr Default
-      link: http://{{ sonarr_default_ip }}:8989
+      link: http://{{ sonarr_default_ip_port }}
       icon:
         url: https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/svg/sonarr.svg
         wrap: true
       status:
         enabled: true
     - title: Readarr Default
-      link: http://{{ readarr_default_ip }}:8787
+      link: http://{{ readarr_default_ip_port }}
       icon:
         url: https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/svg/readarr.svg
         wrap: true
@@ -34,21 +34,21 @@ services:
         enabled: true
   Anime:
     - title: Radarr Anime
-      link: http://{{ radarr_anime_ip }}:7878
+      link: http://{{ radarr_anime_ip_port }}
       icon:
         url: https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/svg/radarr.svg
         wrap: true
       status:
         enabled: true
     - title: Sonarr Anime
-      link: http://{{ sonarr_anime_ip }}:8989
+      link: http://{{ sonarr_anime_ip_port }}
       icon:
         url: https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/svg/sonarr.svg
         wrap: true
       status:
         enabled: true
     - title: Readarr Anime
-      link: http://{{ readarr_anime_ip }}:8787
+      link: http://{{ readarr_anime_ip_port }}
       icon:
         url: https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/svg/readarr.svg
         wrap: true
@@ -66,7 +66,7 @@ services:
       status:
         enabled: true
     - title: Prowlarr
-      link: http://{{ prowlarr_ip }}:9696
+      link: http://{{ prowlarr_ip_port }}
       icon:
         url: https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/svg/prowlarr.svg
         wrap: true

@@ -580,6 +580,39 @@ output "configure_jellyseerr_output" {
   }
 }
 
+locals {
+  servar_ipconfigs = {
+    radarr_default = {
+      ip   = length(module.radarr-default.ip_addresses) > 0 ? module.radarr-default.ip_addresses[0] : null
+      port = 7878
+    }
+    radarr_anime = {
+      ip   = length(module.radarr-anime.ip_addresses) > 0 ? module.radarr-anime.ip_addresses[0] : null
+      port = 7878
+    }
+    sonarr_default = {
+      ip   = length(module.sonarr-default.ip_addresses) > 0 ? module.sonarr-default.ip_addresses[0] : null
+      port = 8989
+    }
+    sonarr_anime = {
+      ip   = length(module.sonarr-anime.ip_addresses) > 0 ? module.sonarr-anime.ip_addresses[0] : null
+      port = 8989
+    }
+    readarr_default = {
+      ip   = length(module.readarr-default.ip_addresses) > 0 ? module.readarr-default.ip_addresses[0] : null
+      port = 8787
+    }
+    readarr_anime = {
+      ip   = length(module.readarr-anime.ip_addresses) > 0 ? module.readarr-anime.ip_addresses[0] : null
+      port = 8787
+    }
+    prowlarr = {
+      ip   = length(module.prowlarr.ip_addresses) > 0 ? module.prowlarr.ip_addresses[0] : null
+      port = 9696
+    }
+  }
+}
+
 module "startpage" {
   source = "../modules/lxc"
 
@@ -629,15 +662,20 @@ module "startpage" {
     is_replayable     = true
     disable_ssh_check = true
     extra_vars = {
-      radarr_default_ip  = length(module.radarr-default.ip_addresses) > 0 ? module.radarr-default.ip_addresses[0] : null
-      radarr_anime_ip    = length(module.radarr-anime.ip_addresses) > 0 ? module.radarr-anime.ip_addresses[0] : null
-      sonarr_default_ip  = length(module.sonarr-default.ip_addresses) > 0 ? module.sonarr-default.ip_addresses[0] : null
-      sonarr_anime_ip    = length(module.sonarr-anime.ip_addresses) > 0 ? module.sonarr-anime.ip_addresses[0] : null
-      readarr_default_ip = length(module.readarr-default.ip_addresses) > 0 ? module.readarr-default.ip_addresses[0] : null
-      readarr_anime_ip   = length(module.readarr-anime.ip_addresses) > 0 ? module.readarr-anime.ip_addresses[0] : null
-      prowlarr_ip        = length(module.prowlarr.ip_addresses) > 0 ? module.prowlarr.ip_addresses[0] : null
+      radarr_default_ip_port  = "${local.servar_ipconfigs.radarr_default.ip}:${local.servar_ipconfigs.radarr_default.port}"
+      radarr_anime_ip_port    = "${local.servar_ipconfigs.radarr_anime.ip}:${local.servar_ipconfigs.radarr_anime.port}"
+      sonarr_default_ip_port  = "${local.servar_ipconfigs.sonarr_default.ip}:${local.servar_ipconfigs.sonarr_default.port}"
+      sonarr_anime_ip_port    = "${local.servar_ipconfigs.sonarr_anime.ip}:${local.servar_ipconfigs.sonarr_anime.port}"
+      readarr_default_ip_port = "${local.servar_ipconfigs.readarr_default.ip}:${local.servar_ipconfigs.readarr_default.port}"
+      readarr_anime_ip_port   = "${local.servar_ipconfigs.readarr_anime.ip}:${local.servar_ipconfigs.readarr_anime.port}"
+      prowlarr_ip_port        = "${local.servar_ipconfigs.prowlarr.ip}:${local.servar_ipconfigs.prowlarr.port}"
     },
   }
+}
+
+resource "local_file" "servar_ipconfigs" {
+  content  = jsonencode(local.servar_ipconfigs)
+  filename = "${path.module}/servarr_ipconfigs.json"
 }
 
 output "configure_startpage_output" {
