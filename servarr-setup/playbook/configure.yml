@@ -94,9 +94,11 @@
 
         - name: Download RClone package
           ansible.builtin.get_url:
-            url: https://downloads.rclone.org/{{ _rclone_version.content | trim | split | last }}/rclone-{{ _rclone_version.content | trim | split | last }}-linux-amd64.deb
+            url: https://downloads.rclone.org/{{ rclone_version }}/rclone-{{ rclone_version }}-linux-amd64.deb
             dest: /tmp/rclone.deb
             mode: "0744"
+          vars:
+            rclone_version: "{{ _rclone_version.content | trim | split | last }}"
 
         - name: Install RClone
           ansible.builtin.apt:
