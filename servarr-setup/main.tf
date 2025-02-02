@@ -581,7 +581,7 @@ output "configure_jellyseerr_output" {
 }
 
 locals {
-  servar_ipconfigs = {
+  servarr_ipconfigs = {
     radarr_default = {
       ip   = length(module.radarr-default.ip_addresses) > 0 ? module.radarr-default.ip_addresses[0] : null
       port = 7878
@@ -609,6 +609,10 @@ locals {
     prowlarr = {
       ip   = length(module.prowlarr.ip_addresses) > 0 ? module.prowlarr.ip_addresses[0] : null
       port = 9696
+    }
+    flaresolverr = {
+      ip   = length(module.startpage.ip_addresses) > 0 ? module.startpage.ip_addresses[0] : null
+      port = 8191
     }
   }
 }
@@ -648,8 +652,8 @@ module "startpage" {
     }
   ]
 
-  assigned_cores  = 1
-  assigned_memory = 2048
+  assigned_cores  = 2
+  assigned_memory = 4048
   assigned_swap   = 1024
 
   disks = [{
@@ -662,19 +666,24 @@ module "startpage" {
     is_replayable     = true
     disable_ssh_check = true
     extra_vars = {
-      radarr_default_ip_port  = "${local.servar_ipconfigs.radarr_default.ip}:${local.servar_ipconfigs.radarr_default.port}"
-      radarr_anime_ip_port    = "${local.servar_ipconfigs.radarr_anime.ip}:${local.servar_ipconfigs.radarr_anime.port}"
-      sonarr_default_ip_port  = "${local.servar_ipconfigs.sonarr_default.ip}:${local.servar_ipconfigs.sonarr_default.port}"
-      sonarr_anime_ip_port    = "${local.servar_ipconfigs.sonarr_anime.ip}:${local.servar_ipconfigs.sonarr_anime.port}"
-      readarr_default_ip_port = "${local.servar_ipconfigs.readarr_default.ip}:${local.servar_ipconfigs.readarr_default.port}"
-      readarr_anime_ip_port   = "${local.servar_ipconfigs.readarr_anime.ip}:${local.servar_ipconfigs.readarr_anime.port}"
-      prowlarr_ip_port        = "${local.servar_ipconfigs.prowlarr.ip}:${local.servar_ipconfigs.prowlarr.port}"
+      servarr_fqdn            = "servarr.lab.soubilabs.xyz"
+      radarr_default_ip_port  = "${local.servarr_ipconfigs.radarr_default.ip}:${local.servarr_ipconfigs.radarr_default.port}"
+      radarr_default_ip       = local.servarr_ipconfigs.radarr_default.ip
+      radarr_anime_ip_port    = "${local.servarr_ipconfigs.radarr_anime.ip}:${local.servarr_ipconfigs.radarr_anime.port}"
+      radarr_anime_ip         = local.servarr_ipconfigs.radarr_anime.ip
+      sonarr_default_ip_port  = "${local.servarr_ipconfigs.sonarr_default.ip}:${local.servarr_ipconfigs.sonarr_default.port}"
+      sonarr_default_ip       = local.servarr_ipconfigs.sonarr_default.ip
+      sonarr_anime_ip_port    = "${local.servarr_ipconfigs.sonarr_anime.ip}:${local.servarr_ipconfigs.sonarr_anime.port}"
+      sonarr_anime_ip         = local.servarr_ipconfigs.sonarr_anime.ip
+      readarr_default_ip_port = "${local.servarr_ipconfigs.readarr_default.ip}:${local.servarr_ipconfigs.readarr_default.port}"
+      readarr_anime_ip_port   = "${local.servarr_ipconfigs.readarr_anime.ip}:${local.servarr_ipconfigs.readarr_anime.port}"
+      prowlarr_ip_port        = "${local.servarr_ipconfigs.prowlarr.ip}:${local.servarr_ipconfigs.prowlarr.port}"
     },
   }
 }
 
-resource "local_file" "servar_ipconfigs" {
-  content  = jsonencode(local.servar_ipconfigs)
+resource "local_file" "servarr_ipconfigs" {
+  content  = jsonencode(local.servarr_ipconfigs)
   filename = "${path.module}/servarr_ipconfigs.json"
 }
 

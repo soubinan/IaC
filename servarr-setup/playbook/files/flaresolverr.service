@@ -1,0 +1,13 @@
+[Unit]
+Description=FlareSolverr Daemon
+After=syslog.target network.target
+[Service]
+User=flaresolverr
+Group=media
+Type=simple
+ExecStart=/opt/flaresolverr/flaresolverr
+TimeoutStopSec=20
+KillMode=process
+Restart=on-failure
+[Install]
+WantedBy=multi-user.target
