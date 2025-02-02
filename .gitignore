@@ -23,6 +23,8 @@ override.tf.json
 *_override.tf
 *_override.tf.json
 
+servarr_ipconfigs.json
+
 # Include override files you do wish to add to version control using negated pattern
 # !example_override.tf
 
@@ -35,6 +37,7 @@ terraform.rc
 
 # Ignore credentials/env file
 .creds*
+.envrc
 .env
 
 # Ignore wrangler dev files and directories
