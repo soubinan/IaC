@@ -50,7 +50,7 @@ resource "zitadel_default_login_policy" "default" {
   ignore_unknown_usernames      = true
   disable_login_with_email      = false
   disable_login_with_phone      = false
-  default_redirect_uri          = "https://auth.lab.soubilabs.xyz/callback"
+  default_redirect_uri          = ""
 }
 
 resource "zitadel_smtp_config" "sender" {

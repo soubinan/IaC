@@ -1,7 +1,7 @@
 terraform {
   backend "s3" {
     bucket = "operations"
-    key    = "tf_states/lxc/zitadel-configs.tfstate"
+    key    = "tf_states/zitadel.tfstate"
     region = "main"
 
     use_path_style              = true
