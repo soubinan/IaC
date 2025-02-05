@@ -41,6 +41,12 @@
       ansible.builtin.apt:
         upgrade: true
         update_cache: true
+      changed_when: false
+
+    - name: Empty /tmp
+      ansible.builtin.command: rm -rf /tmp/*
+      failed_when: false
+      changed_when: true
 
     - name: Check auto-login is configured
       ansible.builtin.stat:
@@ -164,13 +170,12 @@
             seconds: 10
 
     - name: Configure NFS mount
-      when: local_media_path is defined and nfs_media_path is defined and has_sync_paths
+      when: local_media_path is defined and nfs_media_path is defined
       block:
         - name: Install required packages
           ansible.builtin.apt:
             pkg:
               - nfs-common
-              - resolvconf
             state: present
             autoremove: true
 
@@ -341,12 +346,27 @@
             name: flaresolverr.service
             state: restarted
 
-    - name: Restart Servarr app service
+    - name: Check config path exists
+      ansible.builtin.stat:
+        path: "/var/lib/{{ app_name }}"
+      register: config_path_exists
+
+    - name: Copy config file
+      ansible.builtin.template:
+        src: "files/config.xml"
+        dest: "/var/lib/{{ app_name }}/config.xml"
+        mode: "0644"
+        force: true
+        owner: "{{ app_name }}"
+        group: media
+      when: config_path_exists.stat.exists
+
+    - name: Restart starr app service
       ansible.builtin.systemd_service:
         enabled: true
         name: "{{ app_name }}.service"
         state: restarted
-      when: has_sync_paths
+      when: has_sync_paths or config_path_exists.stat.exists
 
     - name: Ensure bazarr user own /opt/bazarr
       ansible.builtin.command: |
@@ -355,11 +375,19 @@
       failed_when: false
       changed_when: true
 
-    - name: Try Restart bazarr service
+    - name: Restart bazarr service
       ansible.builtin.systemd_service:
         enabled: true
         name: bazarr.service
         state: restarted
       when: has_sync_paths and (app_name == "radarr" or app_name == "sonarr")
       failed_when: false
+
+    - name: Cleanup disk space
+      ansible.builtin.command: |
+        rm -rf /tmp/*
+        apt clean
+        apt autoremove -y
+      failed_when: false
+      changed_when: true
 ...

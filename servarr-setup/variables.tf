@@ -35,3 +35,9 @@ variable "time_zone" {
   type    = string
   default = "UTC"
 }
+
+variable "starr_api_key" {
+  type      = string
+  sensitive = true
+  default   = null
+}

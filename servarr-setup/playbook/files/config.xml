@@ -1,0 +1,17 @@
+<Config>
+    <BindAddress>0.0.0.0</BindAddress>
+    <Port>8080</Port>
+    <SslPort>8443</SslPort>
+    <EnableSsl>False</EnableSsl>
+    <LaunchBrowser>True</LaunchBrowser>
+    <ApiKey>{{ starr_api_key }}</ApiKey>
+    <AuthenticationMethod>Forms</AuthenticationMethod>
+    <AuthenticationRequired>DisabledForLocalAddresses</AuthenticationRequired>
+    <Branch>main</Branch>
+    <LogLevel>debug</LogLevel>
+    <SslCertPath></SslCertPath>
+    <SslCertPassword></SslCertPassword>
+    <UrlBase></UrlBase>
+    <InstanceName>{{ app_name | capitalize }}</InstanceName>
+    <UpdateAutomatically>True</UpdateAutomatically>
+</Config>

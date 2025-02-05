@@ -53,7 +53,7 @@ module "radarr-default" {
 
   disks = [{
     datastore_id = "local-lvm"
-    size         = 4
+    size         = 8
   }]
 
   enable_nfs = true
@@ -73,6 +73,7 @@ module "radarr-default" {
       dst_data_0_path         = "radarr/default/var"
       src_data_1_path         = "/opt/bazarr/data"
       dst_data_1_path         = "radarr/default/bazarr"
+      starr_api_key           = var.starr_api_key
     },
   }
 }
@@ -126,7 +127,7 @@ module "radarr-anime" {
 
   disks = [{
     datastore_id = "local-lvm"
-    size         = 4
+    size         = 8
   }]
 
   enable_nfs = true
@@ -146,6 +147,7 @@ module "radarr-anime" {
       dst_data_0_path         = "radarr/anime/var"
       src_data_1_path         = "/opt/bazarr/data"
       dst_data_1_path         = "radarr/anime/bazarr"
+      starr_api_key           = var.starr_api_key
     },
   }
 }
@@ -199,7 +201,7 @@ module "sonarr-default" {
 
   disks = [{
     datastore_id = "local-lvm"
-    size         = 4
+    size         = 8
   }]
 
   enable_nfs = true
@@ -219,6 +221,7 @@ module "sonarr-default" {
       dst_data_0_path         = "sonarr/default/var"
       src_data_1_path         = "/opt/bazarr/data"
       dst_data_1_path         = "sonarr/default/bazarr"
+      starr_api_key           = var.starr_api_key
     },
   }
 }
@@ -272,7 +275,7 @@ module "sonarr-anime" {
 
   disks = [{
     datastore_id = "local-lvm"
-    size         = 4
+    size         = 8
   }]
 
   enable_nfs = true
@@ -292,6 +295,7 @@ module "sonarr-anime" {
       dst_data_0_path         = "sonarr/anime/var"
       src_data_1_path         = "/opt/bazarr/data"
       dst_data_1_path         = "sonarr/anime/bazarr"
+      starr_api_key           = var.starr_api_key
     },
   }
 }
@@ -345,7 +349,7 @@ module "readarr-default" {
 
   disks = [{
     datastore_id = "local-lvm"
-    size         = 4
+    size         = 8
   }]
 
   enable_nfs = true
@@ -363,6 +367,7 @@ module "readarr-default" {
       local_media_path        = "/mnt/media"
       src_data_0_path         = "/var/lib/readarr"
       dst_data_0_path         = "readarr/default/var"
+      starr_api_key           = var.starr_api_key
     },
   }
 }
@@ -416,7 +421,7 @@ module "readarr-anime" {
 
   disks = [{
     datastore_id = "local-lvm"
-    size         = 4
+    size         = 8
   }]
 
   enable_nfs = true
@@ -435,6 +440,7 @@ module "readarr-anime" {
       local_media_path        = "/mnt/media"
       src_data_0_path         = "/var/lib/readarr"
       dst_data_0_path         = "readarr/anime/var"
+      starr_api_key           = var.starr_api_key
     },
   }
 }
@@ -487,10 +493,8 @@ module "prowlarr" {
 
   disks = [{
     datastore_id = "local-lvm"
-    size         = 4
+    size         = 8
   }]
-
-  enable_nfs = true
 
   ansible_playbook = {
     path              = "./playbook/configure.yml"
@@ -502,6 +506,7 @@ module "prowlarr" {
       minio_endpoint          = var.minio_endpoint
       src_data_0_path         = "/var/lib/prowlarr"
       dst_data_0_path         = "prowlarr/var"
+      starr_api_key           = var.starr_api_key
     },
   }
 }
@@ -554,7 +559,7 @@ module "jellyseerr" {
 
   disks = [{
     datastore_id = "local-lvm"
-    size         = 4
+    size         = 8
   }]
 
   enable_nfs = true
@@ -569,6 +574,7 @@ module "jellyseerr" {
       minio_endpoint          = var.minio_endpoint
       src_data_0_path         = "/opt/jellyseerr/config"
       dst_data_0_path         = "jellyseerr/var"
+      starr_api_key           = var.starr_api_key
     },
   }
 }
@@ -584,31 +590,31 @@ locals {
   servarr_ipconfigs = {
     radarr_default = {
       ip   = length(module.radarr-default.ip_addresses) > 0 ? module.radarr-default.ip_addresses[0] : null
-      port = 7878
+      port = 8080
     }
     radarr_anime = {
       ip   = length(module.radarr-anime.ip_addresses) > 0 ? module.radarr-anime.ip_addresses[0] : null
-      port = 7878
+      port = 8080
     }
     sonarr_default = {
       ip   = length(module.sonarr-default.ip_addresses) > 0 ? module.sonarr-default.ip_addresses[0] : null
-      port = 8989
+      port = 8080
     }
     sonarr_anime = {
       ip   = length(module.sonarr-anime.ip_addresses) > 0 ? module.sonarr-anime.ip_addresses[0] : null
-      port = 8989
+      port = 8080
     }
     readarr_default = {
       ip   = length(module.readarr-default.ip_addresses) > 0 ? module.readarr-default.ip_addresses[0] : null
-      port = 8787
+      port = 8080
     }
     readarr_anime = {
       ip   = length(module.readarr-anime.ip_addresses) > 0 ? module.readarr-anime.ip_addresses[0] : null
-      port = 8787
+      port = 8080
     }
     prowlarr = {
       ip   = length(module.prowlarr.ip_addresses) > 0 ? module.prowlarr.ip_addresses[0] : null
-      port = 9696
+      port = 8080
     }
     flaresolverr = {
       ip   = length(module.startpage.ip_addresses) > 0 ? module.startpage.ip_addresses[0] : null
@@ -658,7 +664,7 @@ module "startpage" {
 
   disks = [{
     datastore_id = "local-lvm"
-    size         = 4
+    size         = 8
   }]
 
   ansible_playbook = {
@@ -678,6 +684,7 @@ module "startpage" {
       readarr_default_ip_port = "${local.servarr_ipconfigs.readarr_default.ip}:${local.servarr_ipconfigs.readarr_default.port}"
       readarr_anime_ip_port   = "${local.servarr_ipconfigs.readarr_anime.ip}:${local.servarr_ipconfigs.readarr_anime.port}"
       prowlarr_ip_port        = "${local.servarr_ipconfigs.prowlarr.ip}:${local.servarr_ipconfigs.prowlarr.port}"
+      starr_api_key           = var.starr_api_key
     },
   }
 }
