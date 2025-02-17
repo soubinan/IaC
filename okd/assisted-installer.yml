@@ -1,0 +1,118 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config
+data:
+  ASSISTED_SERVICE_HOST: 127.0.0.1:8090
+  ASSISTED_SERVICE_SCHEME: http
+  AUTH_TYPE: none
+  DB_HOST: 127.0.0.1
+  DB_NAME: installer
+  DB_PASS: admin
+  DB_PORT: "5432"
+  DB_USER: admin
+  DEPLOY_TARGET: onprem
+  DISK_ENCRYPTION_SUPPORT: "false"
+  DUMMY_IGNITION: "false"
+  ENABLE_SINGLE_NODE_DNSMASQ: "false"
+  HW_VALIDATOR_REQUIREMENTS: '[{"version":"default","master":{"cpu_cores":4,"ram_mib":16384,"disk_size_gb":100,"installation_disk_speed_threshold_ms":10,"network_latency_threshold_ms":100,"packet_loss_percentage":0},"worker":{"cpu_cores":2,"ram_mib":8192,"disk_size_gb":100,"installation_disk_speed_threshold_ms":10,"network_latency_threshold_ms":1000,"packet_loss_percentage":10},"sno":{"cpu_cores":8,"ram_mib":16384,"disk_size_gb":100,"installation_disk_speed_threshold_ms":10},"edge-worker":{"cpu_cores":2,"ram_mib":8192,"disk_size_gb":15,"installation_disk_speed_threshold_ms":10}}]'
+  IMAGE_SERVICE_BASE_URL: http://127.0.0.1:8888
+  IPV6_SUPPORT: "true"
+  ISO_IMAGE_TYPE: "full-iso"
+  LISTEN_PORT: "8888"
+  NTP_DEFAULT_SERVER: "172.17.10.3"
+  POSTGRESQL_DATABASE: installer
+  POSTGRESQL_PASSWORD: admin
+  POSTGRESQL_USER: admin
+  PUBLIC_CONTAINER_REGISTRIES: "quay.io,registry.ci.openshift.org"
+  SERVICE_BASE_URL: http://192.168.100.97:8090
+  STORAGE: filesystem
+  OS_IMAGES: |
+    [
+        {
+            "openshift_version": "4.17",
+            "cpu_architecture": "x86_64",
+            "url": "https://mirror.openshift.com/pub/openshift-v4/x86_64/dependencies/rhcos/4.17/4.17.0/rhcos-4.17.0-x86_64-live.x86_64.iso",
+            "version": "417.94.202408270355-0"
+        },
+        {
+            "openshift_version": "4.15",
+            "cpu_architecture": "x86_64",
+            "url": "https://builds.coreos.fedoraproject.org/prod/streams/stable/builds/39.20231101.3.0/x86_64/fedora-coreos-39.20231101.3.0-live.x86_64.iso",
+            "version": "39.20231101.3.0"
+        }
+    ]
+  RELEASE_IMAGES: |
+    [
+      {
+        "openshift_version": "4.17",
+        "cpu_architecture": "x86_64",
+        "cpu_architectures": ["x86_64"],
+        "url": "quay.io/okd/scos-release:4.17.0-okd-scos.0",
+        "version": "4.17.0-okd-scos.0",
+        "default": true,
+        "support_level": "production"
+      },
+      {
+        "openshift_version": "4.15",
+        "cpu_architecture": "x86_64",
+        "cpu_architectures": ["x86_64"],
+        "url": "quay.io/openshift/okd:4.15.0-0.okd-2024-03-10-010116",
+        "version": "4.15.0-0.okd-2024-03-10-010116",
+        "default": false,
+        "support_level": "production"
+      }
+    ]
+  ENABLE_UPGRADE_AGENT: "true"
+  ENABLE_OKD_SUPPORT: "true"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    app: assisted-installer
+  name: assisted-installer
+spec:
+  containers:
+    - args:
+        - run-postgresql
+      image: quay.io/sclorg/postgresql-12-c8s:latest
+      name: db
+      envFrom:
+        - configMapRef:
+            name: config
+      volumeMounts:
+        - mountPath: /var/lib/pgsql
+          name: pg-data
+    - image: quay.io/edge-infrastructure/assisted-installer-ui:latest-eb89faf736643adfb45ee74f8f340d613aa66103
+      name: ui
+      ports:
+        - hostPort: 8080
+      envFrom:
+        - configMapRef:
+            name: config
+    - image: quay.io/edge-infrastructure/assisted-image-service:latest-2024-12-01
+      name: image-service
+      ports:
+        - hostPort: 8888
+      envFrom:
+        - configMapRef:
+            name: config
+    - image: quay.io/edge-infrastructure/assisted-service:latest-2024-12-01
+      name: service
+      ports:
+        - hostPort: 8090
+      envFrom:
+        - configMapRef:
+            name: config
+      volumeMounts:
+        - mountPath: /data
+          name: ai-data
+  restartPolicy: Never
+  volumes:
+    - name: ai-data
+      persistentVolumeClaim:
+        claimName: ai-service-data
+    - name: pg-data
+      persistentVolumeClaim:
+        claimName: ai-db-data

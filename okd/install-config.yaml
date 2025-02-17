@@ -1,0 +1,27 @@
+apiVersion: v1
+baseDomain: lab.soubilabs.xyz
+compute:
+  - name: worker
+    replicas: 0
+controlPlane:
+  name: controller0
+  replicas: 1
+metadata:
+  name: okd
+networking:
+  clusterNetwork:
+    - cidr: 10.20.0.0/14
+      hostPrefix: 20
+  machineNetwork:
+    - cidr: 192.168.100.0/25
+  networkType: OVNKubernetes
+  serviceNetwork:
+    - 172.30.0.0/16
+platform:
+  none: {}
+bootstrapInPlace:
+  installationDisk: /dev/sda
+pullSecret: |
+  {"auths":{"fake":{"auth":"aWQ6cGFzcwo="}}}
+sshKey: |
+  ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCh5qWa/Y4ZNh5TRMjOQQt24xDp6S3hhE9NT/DHouJpC34Oy9Ozd1SrOqzl7MFkOrrsDwAN0zuLelZ0jnt9V1MBAV7KW95yMKRAk8LjE09FO+8dFLZaGqKSQm2deEOe1V5YCMqQT82eRrDrZ2dfaRzDRqcJnT/U7xStqU5BxtUYXbKy3+WqVAuDHhq+BDYHgHFv9g9OOUkddZf4AnjSWY5WDFgMyGupeQFEpAEMSRGG9mMrka7mASN/zdarCyhTGgzqmkYU/FR0Zez5MZo4DiOxHuQjdNv0m8iVK5iE519UtTeu2IBei/VsoZd5d9FXwkNM/ieojAYs9kVeo3eJCmeYbwcLvOL5TyExHL9WREUFA5B4K5qE3E9OrXp/jUfIlEbLEa3cWDVbR+F2qYJogM/9EePF5GmFihioH8rQuHLkJJwJWRVlW+2GjWxRof93CjcDeU1Vg2Q6gIL85qVvPjxY+D38MKQAUWPI2z5/N+nu2QefOKlcBObWJZCW+Zquj80= soubinan@xps13

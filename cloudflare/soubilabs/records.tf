@@ -89,8 +89,15 @@ resource "cloudflare_record" "soubilabs_tlsrpt" {
   type    = "TXT"
 }
 
-########## Brevo email sender
+########## Github Org verification
+resource "cloudflare_record" "soubilabs_gh_org" {
+  zone_id = var.soubilabs_zone_id
+  name    = "_gh-SoubiLabs-o"
+  value   = "4408c51e29"
+  type    = "TXT"
+}
 
+########## Brevo email sender
 resource "cloudflare_record" "soubilabs_brevo_dkim1" {
   zone_id = var.soubilabs_zone_id
   name    = "brevo1._domainkey"
