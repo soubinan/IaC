@@ -1,43 +1,33 @@
-resource "cloudflare_zone_settings_override" "soubilabs_zone_settings" {
-  zone_id = var.soubilabs_zone_id
-
-  settings {
+resource "cloudflare_zone_setting" "soubilabs_zone_settings" {
+  for_each = {
     always_use_https         = "on"
     brotli                   = "on"
     tls_1_3                  = "on"
     automatic_https_rewrites = "on"
     ssl                      = "strict"
     min_tls_version          = "1.2"
-
-    http2                       = null
-    mirage                      = null
-    origin_error_page_pass_thru = null
-    polish                      = null
-    prefetch_preload            = null
-    proxy_read_timeout          = null
-    response_buffering          = null
-    sort_query_string_for_cache = null
-    true_client_ip_header       = null
-    webp                        = null
-    image_resizing              = null
-
-    minify {
+    opportunistic_encryption = "on"
+    minify = {
       css  = "on"
       js   = "on"
       html = "on"
     }
-
-    security_header {
+    security_header = {
       enabled            = true
       include_subdomains = true
       max_age            = 31536000
     }
   }
+
+  zone_id    = var.soubilabs_zone_id
+  setting_id = each.key
+  value      = each.value
 }
 
-resource "cloudflare_zone_dnssec" "soubilabs" {
-  zone_id = var.soubilabs_zone_id
-}
+# resource "cloudflare_zone_dnssec" "soubilabs" {
+#   zone_id = var.soubilabs_zone_id
+#   status  = "active"
+# }
 
 resource "cloudflare_bot_management" "soubilabs_anti_bot" {
   zone_id    = var.soubilabs_zone_id

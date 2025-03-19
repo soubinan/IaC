@@ -5,9 +5,11 @@ variable "account_id" {
 
 ####### soubilabs ZONE
 variable "soubilabs_zone_id" {
+  type    = string
   default = "4c0aeed8407334470ead0551c57e3cd3"
 }
 
 variable "soubilabs_domain" {
+  type    = string
   default = "soubilabs.xyz"
 }
