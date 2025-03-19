@@ -1,6 +1,5 @@
 resource "cloudflare_email_routing_settings" "soubilabs" {
   zone_id = var.soubilabs_zone_id
-  enabled = "true"
 }
 
 resource "cloudflare_email_routing_address" "soubinan_gmail" {
@@ -13,18 +12,18 @@ resource "cloudflare_email_routing_rule" "mail_soubilabs" {
   name    = "rule"
   enabled = true
 
-  matcher {
+  matchers = [{
     type  = "literal"
     field = "to"
     value = "mail@soubilabs.xyz"
-  }
+  }]
 
-  action {
+  actions = [{
     type = "forward"
     value = [
       cloudflare_email_routing_address.soubinan_gmail.email
     ]
-  }
+  }]
 }
 
 resource "cloudflare_email_routing_rule" "soubinan_soubilabs" {
@@ -32,16 +31,15 @@ resource "cloudflare_email_routing_rule" "soubinan_soubilabs" {
   name    = "rule"
   enabled = true
 
-  matcher {
+  matchers = [{
     type  = "literal"
     field = "to"
     value = "soubinan@soubilabs.xyz"
-  }
-
-  action {
+  }]
+  actions = [{
     type = "forward"
     value = [
       cloudflare_email_routing_address.soubinan_gmail.email
     ]
-  }
+  }]
 }
