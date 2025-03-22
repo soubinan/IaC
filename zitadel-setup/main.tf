@@ -31,7 +31,7 @@ module "zitadel" {
     image_url         = "https://lxc-images.soubilabs.xyz/downloads/zitadel-latest-amd64-root"
     dst_targeted_node = local.targeted_node_1
     dst_datastore_id  = "local"
-    overwrite         = true
+    overwrite         = false
   }
 
   network_dns_list = [local.network_gateway]
@@ -46,7 +46,7 @@ module "zitadel" {
 
   assigned_cores  = 2
   assigned_memory = 4096
-  assigned_swap   = 1024
+  assigned_swap   = 2048
 
   disks = [{
     datastore_id = "local-lvm"
@@ -55,7 +55,7 @@ module "zitadel" {
 
   ansible_playbook = {
     path              = "./playbook/configure.yml"
-    is_replayable     = false
+    is_replayable     = true
     disable_ssh_check = true
     extra_vars = {
       minio_access_key_id     = var.minio_ops_ak
@@ -63,7 +63,7 @@ module "zitadel" {
       minio_endpoint          = var.minio_endpoint
       src_data_path           = "/opt/zitadel"
       dst_data_path           = "zitadel/data"
-      external_domain         = "auth.lab.soubilabs.xyz"
+      external_domain         = var.zitadel_domain
     },
   }
 }

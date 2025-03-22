@@ -35,3 +35,8 @@ variable "time_zone" {
   type    = string
   default = "UTC"
 }
+
+variable "zitadel_domain" {
+  type      = string
+  sensitive = true
+}
