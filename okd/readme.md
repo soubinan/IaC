@@ -11,6 +11,11 @@ Use the pull secret below if you do not plan to use a real one
 ## Manual installation
 
 ```sh {"interpreter":"/bin/bash"}
+# Get CLI and cluster versions
+oc version
+```
+
+```sh {"interpreter":"/bin/bash"}
 OKD_VERSION=$(curl -s https://api.github.com/repos/okd-project/okd-scos/releases/latest | jq -r '.tag_name')
 curl -sL https://github.com/okd-project/okd-scos/releases/download/${OKD_VERSION}/openshift-client-linux-${OKD_VERSION}.tar.gz | sudo tar xvz -C /usr/local/bin/ oc
 curl -sL https://github.com/okd-project/okd-scos/releases/download/${OKD_VERSION}/openshift-install-linux-${OKD_VERSION}.tar.gz | sudo tar xvz -C /usr/local/bin/ openshift-install
