@@ -24,9 +24,14 @@
   tasks:
     - name: Update packages
       ansible.builtin.apt:
-        upgrade: yes
-        update_cache: yes
+        upgrade: true
+        update_cache: true
         cache_valid_time: 86400
+
+    - name: Empty /tmp
+      ansible.builtin.command: rm -rf /tmp/*
+      failed_when: false
+      changed_when: true
 
     - name: Check auto-login is configured
       ansible.builtin.stat:
@@ -36,12 +41,13 @@
       failed_when: false
 
     - name: Setup auto-login
+      when: not _auto_login_config.stat.exists
       block:
         - name: Ensure override conf directory exists
           ansible.builtin.file:
             path: /etc/systemd/system/container-getty@1.service.d
             state: directory
-            mode: 0755
+            mode: "0755"
 
         - name: Enable auto-login
           ansible.builtin.copy:
@@ -50,7 +56,7 @@
               [Service]
               ExecStart=
               ExecStart=-/sbin/agetty --autologin root --noclear --keep-baud tty%I 115200,38400,9600 \$TERM
-            mode: 0440
+            mode: "0440"
 
         - name: Daemon reload
           ansible.builtin.systemd_service:
@@ -62,8 +68,6 @@
             name: container-getty@1
             state: restarted
 
-      when: not _auto_login_config.stat.exists
-
     - name: Check RClone is installed
       ansible.builtin.command: rclone -h
       register: _rclone_presence_check
@@ -71,6 +75,7 @@
       failed_when: false
 
     - name: Install RClone
+      when: _rclone_presence_check.rc > 0
       block:
         - name: Get RClone version
           ansible.builtin.uri:
@@ -80,14 +85,15 @@
 
         - name: Download RClone package
           ansible.builtin.get_url:
-            url: https://downloads.rclone.org/{{ _rclone_version.content | trim | split | last }}/rclone-{{ _rclone_version.content | trim | split | last }}-linux-amd64.deb
+            url: https://downloads.rclone.org/{{ rclone_version }}/rclone-{{ rclone_version }}-linux-amd64.deb
             dest: /tmp/rclone.deb
+            mode: "0744"
+          vars:
+            rclone_version: "{{ _rclone_version.content | trim | split | last }}"
 
         - name: Install RClone
           ansible.builtin.apt:
             deb: /tmp/rclone.deb
-
-      when: _rclone_presence_check.rc > 0
 
     - name: Setup RClone
       block:
@@ -95,13 +101,13 @@
           ansible.builtin.file:
             path: ~/.config/rclone
             state: directory
-            mode: 0755
+            mode: "0755"
 
         - name: Copy config file
           ansible.builtin.template:
             src: files/rclone.conf
             dest: ~/.config/rclone/rclone.conf
-            mode: 0440
+            mode: "0440"
 
         - name: Check diffs
           ansible.builtin.command: rclone check minio:operations/apps_configs/{{ item.dst_path }} {{ item.src_path }}
@@ -110,19 +116,21 @@
           failed_when: false
           loop: "{{ sync_paths }}"
 
-        - ansible.builtin.set_fact:
+        - name: Check backup diffs
+          ansible.builtin.set_fact:
             files_diff_check: "{{ files_diff_check | default([]) + [{'dst_path': item.item.dst_path, 'src_path': item.item.src_path, 'rc': item.rc}] }}"
           loop: "{{ _files_diff_check.results }}"
 
         - name: Retrieve previous configs version
-          ansible.builtin.command: rclone copy minio:operations/apps_configs/{{ item.dst_path }} {{ item.src_path }} --progress
+          ansible.builtin.command: rclone copy minio:operations/apps_configs/{{ item.dst_path }} {{ item.src_path }}
           loop: "{{ files_diff_check | selectattr('rc', 'gt', 0) | list }}"
+          changed_when: true
 
         - name: Copy unit files
           ansible.builtin.template:
             src: "files/{{ item }}"
             dest: "/etc/systemd/system/{{ item }}"
-            mode: 0440
+            mode: "0440"
             backup: true
             force: true
           loop:
@@ -153,4 +161,3 @@
         enabled: true
         name: "{{ app_name | lower }}.service"
         state: restarted
-...

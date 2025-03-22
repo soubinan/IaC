@@ -18,8 +18,8 @@
   tasks:
     - name: Update packages
       ansible.builtin.apt:
-        upgrade: yes
-        update_cache: yes
+        upgrade: true
+        update_cache: true
         cache_valid_time: 86400
 
     - name: Check auto-login is configured
@@ -30,12 +30,13 @@
       failed_when: false
 
     - name: Setup auto-login
+      when: not _auto_login_config.stat.exists
       block:
         - name: Ensure override conf directory exists
           ansible.builtin.file:
             path: /etc/systemd/system/container-getty@1.service.d
             state: directory
-            mode: 0755
+            mode: "0755"
 
         - name: Enable auto-login
           ansible.builtin.copy:
@@ -44,7 +45,7 @@
               [Service]
               ExecStart=
               ExecStart=-/sbin/agetty --autologin root --noclear --keep-baud tty%I 115200,38400,9600 \$TERM
-            mode: 0440
+            mode: "0440"
 
         - name: Daemon reload
           ansible.builtin.systemd_service:
@@ -55,6 +56,3 @@
             enabled: true
             name: container-getty@1
             state: restarted
-
-      when: not _auto_login_config.stat.exists
-...
