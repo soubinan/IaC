@@ -6,6 +6,27 @@ provider "vault" {
   address = local.vault_addr
 }
 
+resource "terraform_data" "get_sno_host" {
+  provisioner "local-exec" {
+    command     = "oc config view --raw --minify --flatten --output='jsonpath={.clusters[].cluster.server}' > ./.data.sno.host"
+    interpreter = ["/bin/bash", "-c"]
+  }
+}
+
+resource "terraform_data" "get_sno_ca" {
+  provisioner "local-exec" {
+    command     = "oc config view --raw --minify --flatten -o jsonpath='{.clusters[].cluster.certificate-authority-data}' | base64 --decode > ./.data.sno_ca.pem"
+    interpreter = ["/bin/bash", "-c"]
+  }
+}
+
+resource "terraform_data" "get_sno_token_reviewer" {
+  provisioner "local-exec" {
+    command     = "oc get secret -n openshift-config vault-auth -o go-template='{{ .data.token }}' | base64 --decode > ./.creds.token_reviewer.jwt"
+    interpreter = ["/bin/bash", "-c"]
+  }
+}
+
 locals {
   vault_infra_credentials = try(jsondecode(file("../zitadel-admin/.creds.vault_oidc.json")), {})
   zitadel_server_url      = "https://${var.zitadel_domain}"
@@ -164,4 +185,11 @@ resource "vault_kubernetes_auth_backend_role" "okd_admin" {
   token_ttl                        = 3600
   token_policies                   = ["default", "admin"]
   audience                         = "vault"
+}
+
+resource "vault_kv_secret_v2" "creds_sno_oidc" {
+  mount = vault_mount.kvs["admins"].path
+  name  = "sno_oidc_client_secret_zitadel"
+
+  data_json = file("../zitadel-admin/.creds.sno_oidc.json")
 }
