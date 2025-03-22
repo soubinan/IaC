@@ -5,10 +5,14 @@ provider "proxmox" {
 }
 
 locals {
-  targeted_node_1 = "pve0"
-  network_gateway = "192.168.100.1"
-  ssh_public_key  = file("~/.ssh/id_rsa.pub")
-  nfs_server      = "192.168.100.9"
+  targeted_node_1      = "pve0"
+  network_gateway      = "192.168.100.1"
+  ssh_public_key       = file("~/.ssh/id_rsa.pub")
+  nfs_server           = "192.168.100.9"
+  nfs_media_path       = "/mnt/pool0/media"
+  local_media_path     = "/mnt/media"
+  nfs_downloads_path   = "/mnt/pool0/media/downloads"
+  local_downloads_path = "/downloads"
 }
 
 module "radarr-default" {
@@ -67,8 +71,10 @@ module "radarr-default" {
       minio_secret_access_key = var.minio_ops_sk
       minio_endpoint          = var.minio_endpoint
       nfs_server              = local.nfs_server
-      nfs_media_path          = "/mnt/pool0/media"
-      local_media_path        = "/mnt/media"
+      nfs_media_path          = local.nfs_media_path
+      local_media_path        = local.local_media_path
+      nfs_downloads_path      = local.nfs_downloads_path
+      local_downloads_path    = local.local_downloads_path
       src_data_0_path         = "/var/lib/radarr"
       dst_data_0_path         = "radarr/default/var"
       src_data_1_path         = "/opt/bazarr/data"
@@ -141,8 +147,10 @@ module "radarr-anime" {
       minio_secret_access_key = var.minio_ops_sk
       minio_endpoint          = var.minio_endpoint
       nfs_server              = local.nfs_server
-      nfs_media_path          = "/mnt/pool0/media"
-      local_media_path        = "/mnt/media"
+      nfs_media_path          = local.nfs_media_path
+      local_media_path        = local.local_media_path
+      nfs_downloads_path      = local.nfs_downloads_path
+      local_downloads_path    = local.local_downloads_path
       src_data_0_path         = "/var/lib/radarr"
       dst_data_0_path         = "radarr/anime/var"
       src_data_1_path         = "/opt/bazarr/data"
@@ -215,8 +223,10 @@ module "sonarr-default" {
       minio_secret_access_key = var.minio_ops_sk
       minio_endpoint          = var.minio_endpoint
       nfs_server              = local.nfs_server
-      nfs_media_path          = "/mnt/pool0/media"
-      local_media_path        = "/mnt/media"
+      nfs_media_path          = local.nfs_media_path
+      local_media_path        = local.local_media_path
+      nfs_downloads_path      = local.nfs_downloads_path
+      local_downloads_path    = local.local_downloads_path
       src_data_0_path         = "/var/lib/sonarr"
       dst_data_0_path         = "sonarr/default/var"
       src_data_1_path         = "/opt/bazarr/data"
@@ -289,8 +299,10 @@ module "sonarr-anime" {
       minio_secret_access_key = var.minio_ops_sk
       minio_endpoint          = var.minio_endpoint
       nfs_server              = local.nfs_server
-      nfs_media_path          = "/mnt/pool0/media"
-      local_media_path        = "/mnt/media"
+      nfs_media_path          = local.nfs_media_path
+      local_media_path        = local.local_media_path
+      nfs_downloads_path      = local.nfs_downloads_path
+      local_downloads_path    = local.local_downloads_path
       src_data_0_path         = "/var/lib/sonarr"
       dst_data_0_path         = "sonarr/anime/var"
       src_data_1_path         = "/opt/bazarr/data"
@@ -363,8 +375,10 @@ module "readarr-default" {
       minio_secret_access_key = var.minio_ops_sk
       minio_endpoint          = var.minio_endpoint
       nfs_server              = local.nfs_server
-      nfs_media_path          = "/mnt/pool0/media"
-      local_media_path        = "/mnt/media"
+      nfs_media_path          = local.nfs_media_path
+      local_media_path        = local.local_media_path
+      nfs_downloads_path      = local.nfs_downloads_path
+      local_downloads_path    = local.local_downloads_path
       src_data_0_path         = "/var/lib/readarr"
       dst_data_0_path         = "readarr/default/var"
       starr_api_key           = var.starr_api_key
@@ -436,8 +450,10 @@ module "readarr-anime" {
       minio_secret_access_key = var.minio_ops_sk
       minio_endpoint          = var.minio_endpoint
       nfs_server              = local.nfs_server
-      nfs_media_path          = "/mnt/pool0/media"
-      local_media_path        = "/mnt/media"
+      nfs_media_path          = local.nfs_media_path
+      local_media_path        = local.local_media_path
+      nfs_downloads_path      = local.nfs_downloads_path
+      local_downloads_path    = local.local_downloads_path
       src_data_0_path         = "/var/lib/readarr"
       dst_data_0_path         = "readarr/anime/var"
       starr_api_key           = var.starr_api_key

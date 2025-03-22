@@ -170,7 +170,7 @@
             seconds: 10
 
     - name: Configure NFS mount
-      when: local_media_path is defined and nfs_media_path is defined
+      when: nfs_media_path is defined or nfs_downloads_path is defined
       block:
         - name: Install required packages
           ansible.builtin.apt:
@@ -181,9 +181,12 @@
 
         - name: Creates mounting directory
           ansible.builtin.file:
-            path: "{{ local_media_path }}"
+            path: "{{ item }}"
             state: directory
             mode: "0777"
+          loop:
+            - "{{ local_media_path }}"
+            - "{{ local_downloads_path }}"
 
         - name: Copy mount file
           ansible.builtin.template:
@@ -195,6 +198,8 @@
           loop:
             - local_path: "{{ local_media_path }}"
               nfs_path: "{{ nfs_media_path }}"
+            - local_path: "{{ local_downloads_path }}"
+              nfs_path: "{{ nfs_downloads_path }}"
 
         - name: Daemon reload
           ansible.builtin.systemd_service:
@@ -207,6 +212,7 @@
             name: "{{ item | replace('/', '-') | regex_replace('^-', '') }}.mount"
           loop:
             - "{{ local_media_path }}"
+            - "{{ local_downloads_path }}"
 
     - name: Setup Servarr
       when: app_name == "servarr"
