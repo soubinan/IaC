@@ -10,6 +10,12 @@ Cloudflare configurations are executed remotely on [Hashicorp Cloud Platform](ht
 
 To run the terraform configurations, set your credentials in an env file (.envrc), check example.envrc as an example you could take inspiration on.
 
+```sh {"interpreter":"/bin/bash"}
+# Load the .envrc content
+
+direnv allow .
+```
+
 ### OKD configurations
 
 The OKD configurations are for the operations only (all about the cluster deployment and configs).
