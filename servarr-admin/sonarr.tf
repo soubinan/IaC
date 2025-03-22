@@ -11,29 +11,31 @@ provider "sonarr" {
 }
 
 resource "sonarr_download_client_qbittorrent" "torrent_sonarrd" {
-  provider       = sonarr.sonarr_default
-  enable         = true
-  priority       = 1
-  name           = "qBittorrent"
-  host           = local.qbt_host
-  port           = local.qbt_port
-  tv_category    = "sonarr-default"
-  first_and_last = true
-  username       = var.qbt_usr
-  password       = var.qbt_pwd
+  provider                   = sonarr.sonarr_default
+  enable                     = true
+  priority                   = 1
+  name                       = "qBittorrent"
+  host                       = local.qbt_host
+  port                       = local.qbt_port
+  tv_category                = "sonarr-default"
+  first_and_last             = true
+  username                   = var.qbt_usr
+  password                   = var.qbt_pwd
+  remove_completed_downloads = true
 }
 
 resource "sonarr_download_client_qbittorrent" "torrent_sonarra" {
-  provider       = sonarr.sonarr_anime
-  enable         = true
-  priority       = 1
-  name           = "qBittorrent"
-  host           = local.qbt_host
-  port           = local.qbt_port
-  tv_category    = "sonarr-anime"
-  first_and_last = true
-  username       = var.qbt_usr
-  password       = var.qbt_pwd
+  provider                   = sonarr.sonarr_anime
+  enable                     = true
+  priority                   = 1
+  name                       = "qBittorrent"
+  host                       = local.qbt_host
+  port                       = local.qbt_port
+  tv_category                = "sonarr-anime"
+  first_and_last             = true
+  username                   = var.qbt_usr
+  password                   = var.qbt_pwd
+  remove_completed_downloads = true
 }
 
 resource "sonarr_root_folder" "path_sonarrd" {

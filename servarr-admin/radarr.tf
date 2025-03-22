@@ -11,29 +11,31 @@ provider "radarr" {
 }
 
 resource "radarr_download_client_qbittorrent" "torrent_radarrd" {
-  provider       = radarr.radarr_default
-  enable         = true
-  priority       = 1
-  name           = "qBittorrent"
-  host           = local.qbt_host
-  port           = local.qbt_port
-  movie_category = "radarr-default"
-  first_and_last = true
-  username       = var.qbt_usr
-  password       = var.qbt_pwd
+  provider                   = radarr.radarr_default
+  enable                     = true
+  priority                   = 1
+  name                       = "qBittorrent"
+  host                       = local.qbt_host
+  port                       = local.qbt_port
+  movie_category             = "radarr-default"
+  first_and_last             = true
+  username                   = var.qbt_usr
+  password                   = var.qbt_pwd
+  remove_completed_downloads = true
 }
 
 resource "radarr_download_client_qbittorrent" "torrent_radarra" {
-  provider       = radarr.radarr_anime
-  enable         = true
-  priority       = 1
-  name           = "qBittorrent"
-  host           = local.qbt_host
-  port           = local.qbt_port
-  movie_category = "radarr-anime"
-  first_and_last = true
-  username       = var.qbt_usr
-  password       = var.qbt_pwd
+  provider                   = radarr.radarr_anime
+  enable                     = true
+  priority                   = 1
+  name                       = "qBittorrent"
+  host                       = local.qbt_host
+  port                       = local.qbt_port
+  movie_category             = "radarr-anime"
+  first_and_last             = true
+  username                   = var.qbt_usr
+  password                   = var.qbt_pwd
+  remove_completed_downloads = true
 }
 
 resource "radarr_root_folder" "path_radarrd" {
@@ -44,6 +46,20 @@ resource "radarr_root_folder" "path_radarrd" {
 resource "radarr_root_folder" "path_radarra" {
   provider = radarr.radarr_anime
   path     = "/mnt/media/movies-anime"
+}
+
+resource "radarr_remote_path_mapping" "path_radarrd" {
+  provider    = radarr.radarr_default
+  host        = "${local.qbt_host}:${local.qbt_port}"
+  remote_path = "/downloads/movies/"
+  local_path  = "/downloads/movies/"
+}
+
+resource "radarr_remote_path_mapping" "path_radarra" {
+  provider    = radarr.radarr_anime
+  host        = "${local.qbt_host}:${local.qbt_port}"
+  remote_path = "/downloads/movies-anime/"
+  local_path  = "/downloads/movies-anime/"
 }
 
 resource "radarr_naming" "naming_radarrd" {

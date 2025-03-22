@@ -11,29 +11,31 @@ provider "readarr" {
 }
 
 resource "readarr_download_client_qbittorrent" "torrent_readarrd" {
-  provider       = readarr.readarr_default
-  enable         = true
-  priority       = 1
-  name           = "qBittorrent"
-  host           = local.qbt_host
-  port           = local.qbt_port
-  book_category  = "readarr-default"
-  first_and_last = true
-  username       = var.qbt_usr
-  password       = var.qbt_pwd
+  provider                   = readarr.readarr_default
+  enable                     = true
+  priority                   = 1
+  name                       = "qBittorrent"
+  host                       = local.qbt_host
+  port                       = local.qbt_port
+  book_category              = "readarr-default"
+  first_and_last             = true
+  username                   = var.qbt_usr
+  password                   = var.qbt_pwd
+  remove_completed_downloads = true
 }
 
 resource "readarr_download_client_qbittorrent" "torrent_readarra" {
-  provider       = readarr.readarr_anime
-  enable         = true
-  priority       = 1
-  name           = "qBittorrent"
-  host           = local.qbt_host
-  port           = local.qbt_port
-  book_category  = "readarr-anime"
-  first_and_last = true
-  username       = var.qbt_usr
-  password       = var.qbt_pwd
+  provider                   = readarr.readarr_anime
+  enable                     = true
+  priority                   = 1
+  name                       = "qBittorrent"
+  host                       = local.qbt_host
+  port                       = local.qbt_port
+  book_category              = "readarr-anime"
+  first_and_last             = true
+  username                   = var.qbt_usr
+  password                   = var.qbt_pwd
+  remove_completed_downloads = true
 }
 
 resource "readarr_root_folder" "path_books_readarrd" {
