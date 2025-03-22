@@ -32,7 +32,7 @@ module "vault" {
     image_url         = "https://lxc-images.soubilabs.xyz/downloads/vault-unsealed-latest-amd64-root"
     dst_targeted_node = local.targeted_node_1
     dst_datastore_id  = "local"
-    overwrite         = true
+    overwrite         = false
   }
 
   network_dns_list = [local.network_gateway]
