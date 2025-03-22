@@ -35,8 +35,9 @@ servarr_ipconfigs.json
 .terraformrc
 terraform.rc
 
-# Ignore credentials/env file
+# Ignore credentials/env/data files
 .creds*
+.data*
 .envrc
 .env
 
@@ -48,3 +49,7 @@ node_modules/
 
 # Ignore RUNME versioned markdown
 *-*.md
+
+# Others
+okd/installation/auth/kubconfig
+okd/installation/auth/password.txt
