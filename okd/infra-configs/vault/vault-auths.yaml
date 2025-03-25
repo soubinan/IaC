@@ -1,0 +1,15 @@
+---
+apiVersion: secrets.hashicorp.com/v1beta1
+kind: VaultAuth
+metadata:
+  name: vault-infra-auth
+  namespace: openshift-config
+spec:
+  vaultConnectionRef: vault-secret-operator/vault-infra-conn
+  method: kubernetes
+  mount: okd_admin
+  kubernetes:
+    role: vault-auth
+    serviceAccount: vault-auth
+    audiences:
+      - vault

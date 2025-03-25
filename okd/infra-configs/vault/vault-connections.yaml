@@ -1,0 +1,13 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: vault-secret-operator
+---
+apiVersion: secrets.hashicorp.com/v1beta1
+kind: VaultConnection
+metadata:
+  name: vault-infra-conn
+  namespace: vault-secret-operator
+spec:
+  address: https://secret.lab.soubilabs.xyz

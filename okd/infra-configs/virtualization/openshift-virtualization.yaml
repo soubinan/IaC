@@ -23,10 +23,3 @@ spec:
   name: kubevirt-hyperconverged
   startingCSV: kubevirt-hyperconverged-operator.v4.17.4
   channel: "stable"
----
-apiVersion: hco.kubevirt.io/v1beta1
-kind: HyperConverged
-metadata:
-  name: kubevirt-hyperconverged
-  namespace: openshift-cnv
-spec: {}
