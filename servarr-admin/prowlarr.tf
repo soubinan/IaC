@@ -122,3 +122,11 @@ resource "prowlarr_indexer_proxy_flaresolverr" "flaresolverr" {
 
   depends_on = [prowlarr_tag.flaresolverr]
 }
+
+resource "prowlarr_download_client_qbittorrent" "torrent_client" {
+  enable   = true
+  priority = 1
+  name     = "qBittorrent"
+  host     = local.qbt_host
+  port     = local.qbt_port
+}
