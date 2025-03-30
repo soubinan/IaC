@@ -1,0 +1,81 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    openshift.io/cluster-monitoring: "true"
+  name: metallb-system
+---
+apiVersion: operators.coreos.com/v1
+kind: OperatorGroup
+metadata:
+  name: metallb-operator
+  namespace: metallb-system
+---
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: metallb-operator-sub
+  namespace: metallb-system
+spec:
+  channel: stable
+  name: metallb-operator
+  source: redhat-operators
+  sourceNamespace: openshift-marketplace
+---
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: high-priority
+value: 1000000
+---
+apiVersion: metallb.io/v1beta1
+kind: MetalLB
+metadata:
+  name: metallb
+  namespace: metallb-system
+spec:
+  controllerConfig:
+    priorityClassName: high-priority
+  speakerConfig:
+    priorityClassName: high-priority
+---
+apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
+metadata:
+  namespace: metallb-system
+  name: infra-ipp
+  labels:
+    zone: infra
+spec:
+  addresses:
+    - 192.168.100.96/27
+---
+apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
+metadata:
+  namespace: metallb-system
+  name: paas-ipp
+  labels:
+    zone: paas
+spec:
+  addresses:
+    - 192.168.110.1/26
+  namespaceSelectors:
+    - matchLabels:
+        zone: paas
+---
+apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
+metadata:
+  namespace: metallb-system
+  name: services-ipp
+  labels:
+    zone: services
+spec:
+  addresses:
+    - 192.168.120.24/29
+  serviceAllocation:
+    priority: 50
+    namespaceSelectors:
+      - matchLabels:
+          zone: services
