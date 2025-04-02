@@ -1,6 +1,8 @@
-# Deploy OKD
+# Setup and Manage an OKD cluster
 
-## Assisted local installation
+## Deploy OKD
+
+### Assisted local installation
 
 Use the pull secret below if you do not plan to use a real one
 
@@ -8,7 +10,7 @@ Use the pull secret below if you do not plan to use a real one
 {"auths":{"fake":{"auth":"aWQ6cGFzcwo="}}}
 ```
 
-## Manual installation
+### Manual installation
 
 ```sh {"interpreter":"/bin/bash"}
 # Get CLI and cluster versions
@@ -43,4 +45,26 @@ wget $(openshift-install coreos print-stream-json |jq -r .architectures.x86_64.a
 ```sh {"interpreter":"/bin/bash"}
 alias coreos-installer='podman run --privileged --pull always --rm -v /dev:/dev -v /run/udev:/run/udev -v $PWD:/data -w /data quay.io/coreos/coreos-installer:release'
 coreos-installer iso ignition embed -fi sno/bootstrap-in-place-for-live-iso.ign fcos-live.iso
+```
+
+## Setup ArgoCD local environment
+
+### Download CLI latest version
+
+```sh {"interpreter":"/bin/bash"}
+VERSION=$(curl -sL https://developers.redhat.com/content-gateway/rest/browse/pub/openshift-v4/clients/openshift-gitops/ |grep -v latest | htmlq 'tr a' --attribute href | cut -d / -f 11 | tail -n 1)
+curl -sSL -o /tmp/argocd-linux-amd64 https://developers.redhat.com/content-gateway/file/pub/openshift-v4/clients/openshift-gitops/${VERSION}/argocd-linux-amd64
+sudo install -m 555 /tmp/argocd-linux-amd64 /usr/local/bin/argocd
+rm /tmp/argocd-linux-amd64
+echo Done
+
+```
+
+### Log into the ArgoCD instance
+
+```sh {"interpreter":"/bin/bash"}
+SERVER_URL=$(oc get routes openshift-gitops-server -n openshift-gitops -o jsonpath='{.status.ingress[0].host}')
+
+argocd login ${SERVER_URL} --skip-test-tls --grpc-web --sso
+argocd version
 ```
