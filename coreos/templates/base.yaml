@@ -224,6 +224,9 @@ systemd:
 {% endblock units %}
 passwd:
   users:
+    - name: core
+      # Generated with: podman run -ti --rm quay.io/coreos/mkpasswd --method=yescrypt
+      password_hash: $y$j9T$I3gMF1tsPzpcQXR3eejeU0$Un/Fd7LzMgtEWeGQeakVSnJYHWT2Q3CPuxywCUnixYB
     - name: soubinan
       # Generated with: podman run -ti --rm quay.io/coreos/mkpasswd --method=yescrypt
       password_hash: $y$j9T$g9YKY7yIoGzRTP9SFByZM1$SveAvxg1YDrg05tW4zXhaI9XcpBOnufKuiH7ALFUGuA

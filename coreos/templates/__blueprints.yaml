@@ -8,14 +8,12 @@ controller:
   secrets_mount:
     remote_server: 192.168.100.9
     remote_path: /mnt/SoubiDrives/VirtualizedShare/containers/.secrets
-    local_path: /var/mnt/shared/containers/secrets
   backups_mount:
     remote_server: 192.168.100.9
     remote_path: /mnt/SoubiDrives/VirtualizedShare/containers/backups
-    local_path: /var/mnt/shared/containers/backups
   networks:
   - gateway: 192.168.100.1
-    interface: eno1
+    interface: ens18
     ip: 192.168.100.6
     nameserver: 192.168.100.1
     prefix: 24
@@ -26,11 +24,9 @@ controller_test:
   secrets_mount:
     remote_server: 192.168.100.9
     remote_path: /mnt/SoubiDrives/VirtualizedShare/containers/.secrets
-    local_path: /var/mnt/shared/containers/secrets
   backups_mount:
     remote_server: 192.168.100.9
     remote_path: /mnt/SoubiDrives/VirtualizedShare/containers/backups
-    local_path: /var/mnt/shared/containers/backups
   networks:
   - gateway: 192.168.90.1
     interface: enp1s0
@@ -43,11 +39,9 @@ igniter:
   templates_mount:
     remote_server: 192.168.100.9
     remote_path: /mnt/SoubiDrives/VirtualizedShare/containers/templates
-    local_path: /var/mnt/shared/containers/templates
   backups_mount:
     remote_server: 192.168.100.9
     remote_path: /mnt/SoubiDrives/VirtualizedShare/containers/backups
-    local_path: /var/mnt/shared/containers/backups
   networks:
   - gateway: 192.168.100.1
     interface: eno1
@@ -61,11 +55,9 @@ igniter_test:
   templates_mount:
     remote_server: 192.168.100.9
     remote_path: /mnt/SoubiDrives/VirtualizedShare/containers/templates
-    local_path: /var/mnt/shared/containers/templates
   backups_mount:
     remote_server: 192.168.100.9
     remote_path: /mnt/SoubiDrives/VirtualizedShare/containers/backups
-    local_path: /var/mnt/shared/containers/backups
   networks:
   - gateway: 192.168.90.1
     interface: enp1s0

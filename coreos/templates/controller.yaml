@@ -1,7 +1,7 @@
 {% extends "base.yaml" %}
 {% block directories %}
-    - path: {{ secrets_mount.local_path }}
-    - path: {{ backups_mount.local_path }}
+    - path: /var/mnt/shared/containers/secrets
+    - path: /var/mnt/shared/containers/backups
     - path: {{ bindings }}/mysql
     - path: {{ bindings }}/xenorchestra
     - path: {{ bindings }}/cloudstack
@@ -335,8 +335,9 @@
           PublishPort=8250:8250
           Network=base.network
           IP=10.100.1.123
-          Volume=cloudstack_configs.volume:/etc/cloudstack:z
-          Volume=cloudstack_data.volume:/var/cloudstack:z
+          Volume=cloudstack_configs.volume:/etc/cloudstack:Z
+          Volume=cloudstack_data.volume:/var/cloudstack:Z
+          Volume=cloudstack_dump.volume:/backup:z
           Secret=cloudstack-env,type=mount,target=/etc/default/cloudstack-init
           PodmanArgs= --privileged
           Label="docker-volume-backup.archive-pre=/bin/sh -c 'cp -r /etc/cloudstack /var/cloudstack /backup'"
@@ -377,32 +378,32 @@
           WantedBy=multi-user.target
 {% endblock files %}
 {% block units %}
-    - name: {{ (secrets_mount.local_path| trim("/")) | replace("/", "-") }}.mount
+    - name: var-mnt-shared-containers-secrets.mount
       enabled: true
       contents: |
         [Unit]
         Description=Mount data directory
-        After=network-online.target
+        After=network-online.target remote-fs.target
         ConditionPathExists=/var/.provisioned__
 
         [Mount]
         What={{ secrets_mount.remote_server }}:{{ secrets_mount.remote_path }}
-        Where={{ secrets_mount.local_path }}
+        Where=/var/mnt/shared/containers/secrets
         Type=nfs4
 
         [Install]
         WantedBy=multi-user.target
-    - name: {{ (backups_mount.local_path| trim("/")) | replace("/", "-") }}.mount
+    - name: var-mnt-shared-containers-backups.mount
       enabled: true
       contents: |
         [Unit]
         Description=Mount data directory
-        After=network-online.target
+        After=network-online.target remote-fs.target
         ConditionPathExists=/var/.provisioned__
 
         [Mount]
         What={{ backups_mount.remote_server }}:{{ backups_mount.remote_path }}
-        Where={{ backups_mount.local_path }}
+        Where=/var/mnt/shared/containers/backups
         Type=nfs4
 
         [Install]
@@ -412,17 +413,17 @@
       contents: |
         [Unit]
         Description=Podman Secrets Injector Job
-        After=network-online.target {{ (secrets_mount.local_path| trim("/")) | replace("/", "-") }}.mount
-        Wants={{ (secrets_mount.local_path| trim("/")) | replace("/", "-") }}.mount
+        After=network-online.target var-mnt-shared-containers-secrets.mount
+        Wants=var-mnt-shared-containers-backups.mount
         ConditionPathExists=/var/.postprovisioned__
         ConditionPathExists=!{{ containers }}/.secrets_ready__
 
         [Service]
         Type=oneshot
         RemainAfterExit=yes
-        ExecStart=/usr/bin/podman secret create mysql-root-pwd {{ secrets_mount.local_path }}/MYSQL_ROOT_PWD
-        ExecStart=/usr/bin/podman secret create mysql-init {{ secrets_mount.local_path }}/01_cloudstack_init.sql
-        ExecStart=/usr/bin/podman secret create cloudstack-env {{ secrets_mount.local_path }}/CLOUDSTACK.env
+        ExecStart=/usr/bin/podman secret create mysql-root-pwd /var/mnt/shared/containers/secrets/MYSQL_ROOT_PWD
+        ExecStart=/usr/bin/podman secret create mysql-init /var/mnt/shared/containers/secrets/01_cloudstack_init.sql
+        ExecStart=/usr/bin/podman secret create cloudstack-env /var/mnt/shared/containers/secrets/CLOUDSTACK.env
         # Secrets injection terminated
         ExecStart=/usr/bin/touch {{ containers }}/.secrets_ready__
 
