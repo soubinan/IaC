@@ -6,30 +6,37 @@ provider "vault" {
   address = local.vault_addr
 }
 
-resource "terraform_data" "get_sno_host" {
-  provisioner "local-exec" {
-    command     = "oc config view --raw --minify --flatten --output='jsonpath={.clusters[].cluster.server}' > ./.data.sno.host"
-    interpreter = ["/bin/bash", "-c"]
+resource "null_resource" "always_run" {
+  triggers = {
+    timestamp = "${timestamp()}"
   }
 }
 
-resource "terraform_data" "get_sno_ca" {
+resource "null_resource" "get_sno_info" {
   provisioner "local-exec" {
-    command     = "oc config view --raw --minify --flatten -o jsonpath='{.clusters[].cluster.certificate-authority-data}' | base64 --decode > ./.data.sno_ca.pem"
+    command     = <<-EOT
+      cat <<EOF > .creds.sno_info.json
+      {
+        "host": "$(oc config view --raw --minify --flatten -o jsonpath='{.clusters[].cluster.server}')",
+        "ca_pem": "$(oc config view --raw --minify --flatten -o jsonpath='{.clusters[].cluster.certificate-authority-data}')",
+        "token_reviewer": "$(oc get secret -n openshift-config vault-auth -o jsonpath='{.data.token}')"
+      }
+      EOF
+    EOT
     interpreter = ["/bin/bash", "-c"]
   }
-}
 
-resource "terraform_data" "get_sno_token_reviewer" {
-  provisioner "local-exec" {
-    command     = "oc get secret -n openshift-config vault-auth -o go-template='{{ .data.token }}' | base64 --decode > ./.creds.token_reviewer.jwt"
-    interpreter = ["/bin/bash", "-c"]
+  lifecycle {
+    replace_triggered_by = [
+      null_resource.always_run
+    ]
   }
 }
 
 locals {
-  vault_infra_credentials = try(jsondecode(file("../zitadel-admin/.creds.vault_oidc.json")), {})
-  zitadel_server_url      = "https://${var.zitadel_domain}"
+  zitadel_outputs    = try(jsondecode(file("../zitadel-admin/.creds.zitadel_outputs.json")), {})
+  sno_info           = try(jsondecode(file("./.creds.sno_info.json")), {})
+  zitadel_server_url = "https://${var.zitadel_domain}"
 
   roles_mapping = {
     admin = {
@@ -88,8 +95,8 @@ resource "vault_jwt_auth_backend" "zitadel" {
   type               = "oidc"
   oidc_discovery_url = local.zitadel_server_url
   bound_issuer       = local.zitadel_server_url
-  oidc_client_id     = local.vault_infra_credentials.client_id
-  oidc_client_secret = local.vault_infra_credentials.client_secret
+  oidc_client_id     = local.zitadel_outputs.vault_infra.clientId
+  oidc_client_secret = local.zitadel_outputs.vault_infra.clientSecret
   default_role       = "viewer"
 
   tune {
@@ -117,15 +124,6 @@ resource "vault_identity_group_alias" "group-aliases" {
   canonical_id   = vault_identity_group.groups[each.key].id
 }
 
-resource "local_file" "zitadel_oidc_path" {
-  content = jsonencode({
-    "path" : vault_jwt_auth_backend.zitadel.path,
-  })
-  filename = "${path.module}/.data.zitadel_oidc_path.json"
-
-  depends_on = [vault_jwt_auth_backend.zitadel]
-}
-
 resource "vault_jwt_auth_backend_role" "roles" {
   backend = vault_jwt_auth_backend.zitadel.path
 
@@ -141,7 +139,7 @@ resource "vault_jwt_auth_backend_role" "roles" {
     "urn:zitadel:iam:user:metadata",
   ]
 
-  bound_audiences = [local.vault_infra_credentials.client_id]
+  bound_audiences = [local.zitadel_outputs.vault_infra.clientId]
   groups_claim    = "roles"
   user_claim      = "email"
 
@@ -171,10 +169,10 @@ resource "vault_auth_backend" "okd_admin" {
 
 resource "vault_kubernetes_auth_backend_config" "okd_admin" {
   backend            = vault_auth_backend.okd_admin.path
-  kubernetes_host    = file("${path.module}/.data.sno.host")
-  kubernetes_ca_cert = file("${path.module}/.data.sno_ca.pem")
+  kubernetes_host    = local.sno_info.host
+  kubernetes_ca_cert = base64decode(local.sno_info.ca_pem)
   issuer             = "https://kubernetes.default.svc"
-  token_reviewer_jwt = file("${path.module}/.creds.token_reviewer.jwt")
+  token_reviewer_jwt = base64decode(local.sno_info.token_reviewer)
 }
 
 resource "vault_kubernetes_auth_backend_role" "okd_admin" {
@@ -187,9 +185,11 @@ resource "vault_kubernetes_auth_backend_role" "okd_admin" {
   audience                         = "vault"
 }
 
-resource "vault_kv_secret_v2" "creds_sno_oidc" {
-  mount = vault_mount.kvs["admins"].path
-  name  = "sno_oidc_client_secret_zitadel"
+resource "vault_kv_secret_v2" "creds_oidc" {
+  for_each = local.zitadel_outputs
 
-  data_json = file("../zitadel-admin/.creds.sno_oidc.json")
+  mount = vault_mount.kvs["admins"].path
+  name  = "${each.key}_oidc_client_secret_zitadel"
+
+  data_json = jsonencode(each.value)
 }
