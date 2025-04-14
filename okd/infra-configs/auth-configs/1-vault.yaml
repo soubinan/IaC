@@ -1,0 +1,68 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: vault-auth
+  namespace: openshift-config
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: vault-auth
+  namespace: openshift-config
+  annotations:
+    kubernetes.io/service-account.name: vault-auth
+type: kubernetes.io/service-account-token
+---
+apiVersion: secrets.hashicorp.com/v1beta1
+kind: VaultConnection
+metadata:
+  name: vault-infra-conn
+  namespace: openshift-config
+spec:
+  address: https://secret.lab.soubilabs.xyz
+---
+apiVersion: secrets.hashicorp.com/v1beta1
+kind: VaultAuthGlobal
+metadata:
+  name: vault-infra-global-auth
+  namespace: openshift-config
+spec:
+  allowedNamespaces:
+    - "*"
+  kubernetes:
+    audiences:
+      - vault
+    tokenExpirationSeconds: 3600
+    mount: okd_admin
+    namespace: "*"
+    role: vault-auth
+    serviceAccount: vault-auth
+  vaultConnectionRef: openshift-config/vault-infra-conn
+  defaultAuthMethod: kubernetes
+---
+apiVersion: secrets.hashicorp.com/v1beta1
+kind: VaultAuth
+metadata:
+  name: vault-infra-auth
+  namespace: openshift-config
+spec:
+  method: kubernetes
+  mount: okd_admin
+  vaultAuthGlobalRef:
+    name: vault-infra-global-auth
+    namespace: openshift-config
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: role-vault-auth-tokenreview-binding
+  namespace: openshift-config
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: system:auth-delegator
+subjects:
+  - kind: ServiceAccount
+    name: vault-auth
+    namespace: openshift-config
