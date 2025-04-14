@@ -1,0 +1,87 @@
+expose:
+  type: ingress
+  tls:
+    enabled: false
+    # The source of the tls certificate. Set as "auto", "secret"
+    # or "none" and fill the information in the corresponding section
+    # 1) auto: generate the tls certificate automatically
+    # 2) secret: read the tls certificate from the specified secret.
+    # The tls certificate can be generated manually or by cert manager
+    # 3) none: configure no tls certificate for the ingress. If the default
+    # tls certificate is configured in the ingress controller, choose this option
+    certSource: none
+  ingress:
+    hosts:
+      core: harbor.apps.okd.lab.soubilabs.xyz
+    className: openshift-default
+    annotations:
+      cert-manager.io/common-name: harbor.apps.okd.lab.soubilabs.xyz
+      cert-manager.io/issuer-name: letsencrypt-cluster-issuer
+      cert-manager.io/issuer-kind: ClusterIssuer
+      route.openshift.io/termination: edge
+
+externalURL: https://harbor.apps.okd.lab.soubilabs.xyz
+
+persistence:
+  enabled: true
+  resourcePolicy: "keep"
+  persistentVolumeClaim:
+    registry:
+      accessMode: ReadWriteOnce
+      size: 5Gi
+    jobservice:
+      jobLog:
+        accessMode: ReadWriteOnce
+        size: 1Gi
+    database:
+      accessMode: ReadWriteOnce
+      size: 1Gi
+    redis:
+      accessMode: ReadWriteOnce
+      size: 1Gi
+    trivy:
+      accessMode: ReadWriteOnce
+      size: 5Gi
+  imageChartStorage:
+    disableredirect: true
+    type: s3
+    s3:
+      existingSecret: "oci-registry-s3-creds"
+      region: noobaa
+      bucket: oci-registry
+      regionendpoint: s3.openshift-storage.svc.cluster.local
+      rootdirectory: /harbor
+      secure: true
+      skipverify: true
+
+ipFamily:
+  ipv6:
+    enabled: false
+
+# Use this set to assign a list of default pullSecrets
+imagePullSecrets:
+#  - name: docker-registry-secret
+#  - name: internal-registry-secret
+
+# cache layer configurations
+# if this feature enabled, harbor will cache the resource
+# `project/project_metadata/repository/artifact/manifest` in the redis
+# which help to improve the performance of high concurrent pulling manifest.
+cache:
+  # default is not enabled.
+  enabled: false
+  # default keep cache for one day.
+  expireHours: 24
+
+## set Container Security Context to comply with PSP restricted policy if necessary
+## each of the container will apply the same security context
+## containerSecurityContext:{} is initially an empty yaml that you could edit it on demand, we just filled with a common template for convenience
+containerSecurityContext:
+  privileged: false
+  allowPrivilegeEscalation: false
+  seccompProfile:
+    type: RuntimeDefault
+  runAsNonRoot: true
+  capabilities:
+    drop:
+      - ALL
