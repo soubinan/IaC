@@ -1,0 +1,9 @@
+apiVersion: objectbucket.io/v1alpha1
+kind: ObjectBucketClaim
+metadata:
+  name: workflows-artifacts
+  namespace: default
+spec:
+  bucketName: workflows-artifacts
+  generateBucketName: workflows-artifacts
+  storageClassName: openshift-storage.noobaa.io

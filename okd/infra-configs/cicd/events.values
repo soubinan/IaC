@@ -1,0 +1,3 @@
+images:
+  pullSecrets:
+    - name: harbor-pull-secret

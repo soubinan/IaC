@@ -1,0 +1,81 @@
+images:
+  pullSecrets:
+    - name: harbor-pull-secret
+
+crds:
+  keep: false
+
+singleNamespace: true
+
+workflow:
+  serviceAccount:
+    create: true
+    name: "argo-workflow"
+    pullSecrets:
+      - name: harbor-pull-secret
+  rbac:
+    create: true
+    agentPermissions: true
+    artifactGC: true
+
+controller:
+  image:
+    registry: harbor.apps.okd.lab.soubilabs.xyz/quay
+
+  resourceRateLimit:
+    limit: 20
+    burst: 2
+
+  rbac:
+    create: true
+
+executor:
+  image:
+    registry: harbor.apps.okd.lab.soubilabs.xyz/quay
+
+server:
+  enabled: true
+  image:
+    registry: harbor.apps.okd.lab.soubilabs.xyz/quay
+
+  authModes: ["sso"]
+
+  ingress:
+    enabled: true
+    annotations:
+      cert-manager.io/common-name: argowf.apps.okd.lab.soubilabs.xyz
+      cert-manager.io/issuer-name: letsencrypt-cluster-issuer
+      cert-manager.io/issuer-kind: ClusterIssuer
+      route.openshift.io/termination: edge
+    ingressClassName: openshift-default
+    hosts:
+      - argowf.apps.okd.lab.soubilabs.xyz
+
+  sso:
+    enabled: true
+    issuer: https://iam.lab.soubilabs.xyz
+    clientId:
+      name: argowf-oidc-secret
+      key: clientId
+    clientSecret:
+      name: argowf-oidc-secret
+      key: clientSecret
+    redirectUrl: "https://argowf.apps.okd.lab.soubilabs.xyz/oauth2/callback"
+    rbac:
+      enabled: false
+    scopes: ["openid", "profile", "email", "roles", "groups"]
+    customGroupClaimName: roles
+
+useStaticCredentials: true
+artifactRepository:
+  s3:
+    accessKeySecret:
+      name: argowf-s3-secret
+      key: REGISTRY_STORAGE_S3_ACCESSKEY
+    secretKeySecret:
+      name: argowf-s3-secret
+      key: REGISTRY_STORAGE_S3_SECRETKEY
+    insecure: true
+    bucket: /workflows-artifacts
+    endpoint: s3.openshift-storage.svc.cluster.local
+    region: noobaa
