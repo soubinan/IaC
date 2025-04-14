@@ -10,54 +10,35 @@ Use the pull secret below if you do not plan to use a real one
 {"auths":{"fake":{"auth":"aWQ6cGFzcwo="}}}
 ```
 
-### Manual installation
-
-```sh {"interpreter":"/bin/bash"}
-# Get CLI and cluster versions
-oc version
-```
+## Install required CLI tools
 
 ```sh {"interpreter":"/bin/bash"}
 OKD_VERSION=$(curl -s https://api.github.com/repos/okd-project/okd-scos/releases/latest | jq -r '.tag_name')
-curl -sL https://github.com/okd-project/okd-scos/releases/download/${OKD_VERSION}/openshift-client-linux-${OKD_VERSION}.tar.gz | sudo tar xvz -C /usr/local/bin/ oc
-curl -sL https://github.com/okd-project/okd-scos/releases/download/${OKD_VERSION}/openshift-install-linux-${OKD_VERSION}.tar.gz | sudo tar xvz -C /usr/local/bin/ openshift-install
+OKD_BIN_REPO=https://github.com/okd-project/okd-scos/releases/download/${OKD_VERSION}
+OKD_BIN_FILES=https://developers.redhat.com/content-gateway
+HELM_VERSION=$(curl -sL ${OKD_BIN_FILES}/rest/browse/pub/openshift-v4/clients/helm/ |grep -v latest | htmlq 'tr a' --attribute href | cut -d / -f 11 | sort -t. -k2,2n | tail -n 1)
+OKD_BIN_FILES=${OKD_BIN_FILES}/file/pub/openshift-v4/clients
+
+# Openshift client
+curl -sL ${OKD_BIN_REPO}/openshift-client-linux-${OKD_VERSION}.tar.gz | sudo tar xz -C /usr/local/bin/ oc
+# Helm
+curl -sL ${OKD_BIN_FILES}/helm/${HELM_VERSION}/helm-linux-amd64 -o /tmp/helm-linux-amd64
+sudo install -m 555 /tmp/helm-linux-amd64 /usr/local/bin/helm
+rm /tmp/helm-linux-amd64
+
 echo Done
 ```
 
 ```sh {"interpreter":"/bin/bash"}
-rm -rf sno
-cp -r sno_ sno
-openshift-install --dir=sno create single-node-ignition-config
-```
+# Get CLI and cluster versions
+echo "Openshift Client version ======="
+oc version --client
 
-```sh {"interpreter":"/bin/bash"}
-OKD_BUILD_ID=$(curl -s https://okd-scos.s3.amazonaws.com/okd-scos/builds/builds.json | jq -r .builds[0].id)
-echo $OKD_BUILD_ID
-OKD_BUILD_ID=414.9.202401231453-0
-echo $OKD_BUILD_ID
-wget https://okd-scos.s3.amazonaws.com/okd-scos/builds/${OKD_BUILD_ID}/x86_64/scos-${OKD_BUILD_ID}-live.x86_64.iso
-```
+echo "HELM version ======="
+helm version
 
-```sh {"interpreter":"/bin/bash"}
-wget $(openshift-install coreos print-stream-json |jq -r .architectures.x86_64.artifacts.metal.formats.iso.disk.location) -O fcos-live.iso
-```
-
-```sh {"interpreter":"/bin/bash"}
-alias coreos-installer='podman run --privileged --pull always --rm -v /dev:/dev -v /run/udev:/run/udev -v $PWD:/data -w /data quay.io/coreos/coreos-installer:release'
-coreos-installer iso ignition embed -fi sno/bootstrap-in-place-for-live-iso.ign fcos-live.iso
-```
-
-## Setup ArgoCD local environment
-
-### Download CLI latest version
-
-```sh {"interpreter":"/bin/bash"}
-VERSION=$(curl -sL https://developers.redhat.com/content-gateway/rest/browse/pub/openshift-v4/clients/openshift-gitops/ |grep -v latest | htmlq 'tr a' --attribute href | cut -d / -f 11 | tail -n 1)
-curl -sSL -o /tmp/argocd-linux-amd64 https://developers.redhat.com/content-gateway/file/pub/openshift-v4/clients/openshift-gitops/${VERSION}/argocd-linux-amd64
-sudo install -m 555 /tmp/argocd-linux-amd64 /usr/local/bin/argocd
-rm /tmp/argocd-linux-amd64
-echo Done
-
+echo "Argo CD version ======="
+argocd version --client
 ```
 
 ### Log into the ArgoCD instance
