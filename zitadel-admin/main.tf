@@ -6,7 +6,6 @@ provider "zitadel" {
 }
 
 locals {
-  zitadel_oidc_path  = try(jsondecode(file("../vault-admin/.data.zitadel_oidc_path.json")), { "path" : "oidc" })
   zitadel_server_url = "https://${var.zitadel_domain}"
 }
 
@@ -17,24 +16,19 @@ resource "zitadel_org" "lab" {
   is_default = true
 }
 
-resource "zitadel_org_metadata" "lab_org_info_layer" {
+resource "zitadel_org_metadata" "lab_org_info" {
   org_id = zitadel_org.lab.id
-  key    = "layer"
-  value  = "infrastructure"
+
+  for_each = {
+    layer   = "infrastructure"
+    target  = "internal, external"
+    purpose = "homelab"
+  }
+
+  key   = each.key
+  value = each.value
 
   depends_on = [zitadel_org.lab]
-}
-
-resource "zitadel_org_metadata" "lab_org_info_target" {
-  org_id = zitadel_org.lab.id
-  key    = "target"
-  value  = "internal, external"
-}
-
-resource "zitadel_org_metadata" "lab_org_info_purpose" {
-  org_id = zitadel_org.lab.id
-  key    = "purpose"
-  value  = "homelab"
 }
 
 resource "zitadel_default_login_policy" "default" {
@@ -101,28 +95,30 @@ resource "zitadel_project" "external" {
   private_labeling_setting = "PRIVATE_LABELING_SETTING_ENFORCE_PROJECT_RESOURCE_OWNER_POLICY"
 }
 
-resource "zitadel_project_role" "admins" {
-  org_id       = zitadel_org.lab.id
-  project_id   = zitadel_project.internal.id
-  role_key     = "infra-admins"
-  display_name = "Infra Admins"
-  group        = "infra-admins"
-}
+resource "zitadel_project_role" "lab_roles" {
+  org_id = zitadel_org.lab.id
 
-resource "zitadel_project_role" "ops" {
-  org_id       = zitadel_org.lab.id
-  project_id   = zitadel_project.internal.id
-  role_key     = "infra-users"
-  display_name = "Infra Users"
-  group        = "infra-users"
-}
+  for_each = {
+    "infra-admins" = {
+      project_id   = zitadel_project.internal.id
+      display_name = "Infra Admins"
+    }
+    "infra-users" = {
+      project_id   = zitadel_project.internal.id
+      display_name = "Infra Users"
+    }
+    "dev-users" = {
+      project_id   = zitadel_project.external.id
+      display_name = "Dev Users"
+    }
+  }
 
-resource "zitadel_project_role" "devs" {
-  org_id       = zitadel_org.lab.id
-  project_id   = zitadel_project.external.id
-  role_key     = "dev-users"
-  display_name = "Dev Users"
-  group        = "dev-users"
+  project_id   = each.value.project_id
+  role_key     = each.key
+  display_name = each.value.display_name
+  group        = each.key
+
+  depends_on = [zitadel_org.lab]
 }
 
 resource "zitadel_action" "flat_roles" {

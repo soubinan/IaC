@@ -3,7 +3,7 @@ resource "zitadel_application_oidc" "sno" {
   org_id     = zitadel_org.lab.id
 
   name                         = "sno"
-  app_type                     = "OIDC_APP_TYPE_USER_AGENT"
+  app_type                     = "OIDC_APP_TYPE_WEB"
   response_types               = ["OIDC_RESPONSE_TYPE_CODE"]
   grant_types                  = ["OIDC_GRANT_TYPE_AUTHORIZATION_CODE"]
   auth_method_type             = "OIDC_AUTH_METHOD_TYPE_BASIC"
@@ -18,21 +18,4 @@ resource "zitadel_application_oidc" "sno" {
   id_token_userinfo_assertion  = true
   additional_origins           = []
   skip_native_app_success_page = true
-}
-
-# resource "random_string" "sno_client_secret_hash" {
-#   length = 16
-#   keepers = {
-#     uuid = "${uuid()}"
-#   }
-# }
-
-resource "local_sensitive_file" "sno_credentials" {
-  content = jsonencode({
-    "clientId" : zitadel_application_oidc.sno.client_id,
-    "clientSecret" : zitadel_application_oidc.sno.client_secret,
-  })
-  filename = "${path.module}/.creds.sno_oidc.json"
-
-  depends_on = [zitadel_application_oidc.sno]
 }
