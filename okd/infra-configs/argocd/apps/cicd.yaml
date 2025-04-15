@@ -21,7 +21,7 @@ spec:
         include: "*.yaml"
     - repoURL: https://argoproj.github.io/argo-helm # Can point to either a Helm chart repo or a git repo.
       chart: argo-workflows # Set this when pulling directly from a Helm repo. DO NOT set for git-hosted Helm charts.
-      # targetRevision: latest # For Helm, this refers to the chart version.
+      targetRevision: 0.45.12 # For Helm, this refers to the chart version.
       helm:
         releaseName: argowf
         valueFiles:

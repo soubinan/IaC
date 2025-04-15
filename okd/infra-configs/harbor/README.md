@@ -8,7 +8,7 @@ oc apply -f .
 
 ## Install Helm Chart
 
-```sh
+```sh {"interpreter":"/bin/bash"}
 helm repo add harbor https://helm.goharbor.io
 helm repo update
 ```
