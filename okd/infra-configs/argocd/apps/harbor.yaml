@@ -21,7 +21,7 @@ spec:
         include: "*.yaml"
     - repoURL: https://helm.goharbor.io # Can point to either a Helm chart repo or a git repo.
       chart: harbor # Set this when pulling directly from a Helm repo. DO NOT set for git-hosted Helm charts.
-      targetRevision: latest # For Helm, this refers to the chart version.
+      # targetRevision: latest # For Helm, this refers to the chart version.
       helm:
         releaseName: harbor
         valueFiles:
