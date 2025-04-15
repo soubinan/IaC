@@ -6,7 +6,7 @@ metadata:
   finalizers:
     - resources-finalizer.argocd.argoproj.io
   labels:
-    types: static-configs
+    type: static-configs
     project: infra
 spec:
   project: infra

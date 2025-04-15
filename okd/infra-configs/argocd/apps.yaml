@@ -20,7 +20,7 @@ metadata:
   finalizers:
     - resources-finalizer.argocd.argoproj.io
   labels:
-    types: configs
+    type: configs
     target: multi-configs
     project: infra
 spec:

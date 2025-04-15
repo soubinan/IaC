@@ -6,7 +6,7 @@ metadata:
   finalizers:
     - resources-finalizer.argocd.argoproj.io
   labels:
-    types: static-configs,helm
+    type: "helm"
     project: infra
 spec:
   project: infra
