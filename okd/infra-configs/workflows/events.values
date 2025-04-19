@@ -1,0 +1,15 @@
+openshift: true
+
+crds:
+  keep: false
+
+global:
+  image:
+    repository: harbor.apps.okd.lab.soubilabs.xyz/quay/argoproj/argo-events
+  imagePullSecrets:
+    - name: harbor-pull-secret
+
+controller:
+  serviceAccount:
+    create: true
+    name: argo-events-controller

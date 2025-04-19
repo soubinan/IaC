@@ -41,7 +41,7 @@ spec:
       mappingMethod: claim
       type: OpenID
       openID:
-        clientID: "311817908940530701"
+        clientID: "315863001397814285"
         clientSecret:
           name: oidc-client-secret-zitadel
         extraScopes:

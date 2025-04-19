@@ -54,7 +54,7 @@ spec:
     namespace: openshift-config
 ---
 apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
+kind: ClusterRoleBinding
 metadata:
   name: role-vault-auth-tokenreview-binding
   namespace: openshift-config

@@ -1,16 +1,12 @@
-images:
-  pullSecrets:
-    - name: harbor-pull-secret
-
 crds:
   keep: false
 
-singleNamespace: true
+singleNamespace: false
 
 workflow:
   serviceAccount:
     create: true
-    name: "argo-workflow"
+    name: argo-workflow
     pullSecrets:
       - name: harbor-pull-secret
   rbac:
@@ -28,6 +24,14 @@ controller:
 
   rbac:
     create: true
+
+  workflowNamespaces:
+    - workflows
+
+  extraArgs:
+    - --namespaced
+    - --managed-namespace
+    - workflows
 
 executor:
   image:

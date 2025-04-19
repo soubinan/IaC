@@ -12,8 +12,10 @@ spec:
         fstype: xfs
         deviceSelector:
           paths:
-            - /dev/disk/by-id/scsi-SDELL_PERC_H330_Adp_0068f06207ff29d02e0086f557f098cd
+            - /dev/disk/by-id/scsi-SDELL_PERC_H330_Adp_00f16c9522af51922f0086f557f098cd
         thinPoolConfig:
           name: thin-pool-1
+          chunkSizeCalculationPolicy: Static
+          metadataSizeCalculationPolicy: Host
           overprovisionRatio: 10
           sizePercent: 90

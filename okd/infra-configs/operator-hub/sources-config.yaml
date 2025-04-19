@@ -1,19 +1,3 @@
-apiVersion: secrets.hashicorp.com/v1beta1
-kind: VaultStaticSecret
-metadata:
-  name: pull-secret
-  namespace: openshift-config
-spec:
-  vaultAuthRef: vault-infra-auth
-  type: kv-v2
-  mount: admins
-  path: sno_openshift_pull_secret
-  destination:
-    overwrite: true
-    create: true
-    name: pull-secret
-    type: kubernetes.io/dockerconfigjson
----
 apiVersion: config.openshift.io/v1
 kind: OperatorHub
 metadata:

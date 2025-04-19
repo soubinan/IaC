@@ -3,7 +3,7 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: user-default-login
-  namespace: argo-workflows
+  namespace: openshift-workflows
   annotations:
     workflows.argoproj.io/rbac-rule: "true"
     workflows.argoproj.io/rbac-rule-precedence: "0"
@@ -12,7 +12,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: user-default-login.service-account-token
-  namespace: argo-workflows
+  namespace: openshift-workflows
   annotations:
     kubernetes.io/service-account.name: user-default-login
 type: kubernetes.io/service-account-token
@@ -21,7 +21,7 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: infra-admin
-  namespace: argo-workflows
+  namespace: openshift-workflows
   annotations:
     workflows.argoproj.io/rbac-rule: "'infra-admins' in groups"
     workflows.argoproj.io/rbac-rule-precedence: "1000"
@@ -30,7 +30,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: infra-admin.service-account-token
-  namespace: argo-workflows
+  namespace: openshift-workflows
   annotations:
     kubernetes.io/service-account.name: infra-admin
 type: kubernetes.io/service-account-token

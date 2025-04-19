@@ -14,18 +14,6 @@ metadata:
     kubernetes.io/service-account.name: vault-auth
 type: kubernetes.io/service-account-token
 ---
-apiVersion: secrets.hashicorp.com/v1beta1
-kind: VaultAuth
-metadata:
-  name: vault-infra-auth
-  namespace: openshift-gitops
-spec:
-  method: kubernetes
-  mount: okd_admin
-  vaultAuthGlobalRef:
-    name: vault-infra-global-auth
-    namespace: openshift-config
----
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
@@ -39,6 +27,18 @@ subjects:
   - kind: ServiceAccount
     name: vault-auth
     namespace: openshift-gitops
+---
+apiVersion: secrets.hashicorp.com/v1beta1
+kind: VaultAuth
+metadata:
+  name: vault-infra-auth
+  namespace: openshift-gitops
+spec:
+  method: kubernetes
+  mount: okd_admin
+  vaultAuthGlobalRef:
+    name: vault-infra-global-auth
+    namespace: openshift-config
 ---
 apiVersion: secrets.hashicorp.com/v1beta1
 kind: VaultStaticSecret
@@ -100,6 +100,7 @@ spec:
     route:
       enabled: true
     host: argocd.apps.okd.lab.soubilabs.xyz
+  sso: {}
   oidcConfig: |
     name: zitadel
     issuer: https://iam.lab.soubilabs.xyz
