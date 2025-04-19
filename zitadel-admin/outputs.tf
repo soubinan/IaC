@@ -1,4 +1,3 @@
-# TODO: Unify all outputs data into one structured file
 resource "local_sensitive_file" "zitadel_outputs" {
   content = jsonencode({
     sno = {
