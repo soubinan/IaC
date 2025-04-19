@@ -25,41 +25,26 @@ data:
   POSTGRESQL_PASSWORD: admin
   POSTGRESQL_USER: admin
   PUBLIC_CONTAINER_REGISTRIES: "quay.io,registry.ci.openshift.org"
-  SERVICE_BASE_URL: http://192.168.100.97:8090
+  SERVICE_BASE_URL: http://192.168.100.67:8090
   STORAGE: filesystem
   OS_IMAGES: |
     [
         {
-            "openshift_version": "4.17",
+            "openshift_version": "4.18",
             "cpu_architecture": "x86_64",
-            "url": "https://mirror.openshift.com/pub/openshift-v4/x86_64/dependencies/rhcos/4.17/4.17.0/rhcos-4.17.0-x86_64-live.x86_64.iso",
-            "version": "417.94.202408270355-0"
-        },
-        {
-            "openshift_version": "4.15",
-            "cpu_architecture": "x86_64",
-            "url": "https://builds.coreos.fedoraproject.org/prod/streams/stable/builds/39.20231101.3.0/x86_64/fedora-coreos-39.20231101.3.0-live.x86_64.iso",
-            "version": "39.20231101.3.0"
+            "url": "https://mirror.openshift.com/pub/openshift-v4/x86_64/dependencies/rhcos/4.18/4.18.1/rhcos-4.18.1-x86_64-live.x86_64.iso",
+            "version": "418.94.202501221327-0"
         }
     ]
   RELEASE_IMAGES: |
     [
       {
-        "openshift_version": "4.17",
+        "openshift_version": "4.18",
         "cpu_architecture": "x86_64",
         "cpu_architectures": ["x86_64"],
-        "url": "quay.io/okd/scos-release:4.17.0-okd-scos.0",
-        "version": "4.17.0-okd-scos.0",
+        "url": "quay.io/okd/scos-release:4.18.0-okd-scos.8",
+        "version": "4.18.0-okd-scos.8",
         "default": true,
-        "support_level": "production"
-      },
-      {
-        "openshift_version": "4.15",
-        "cpu_architecture": "x86_64",
-        "cpu_architectures": ["x86_64"],
-        "url": "quay.io/openshift/okd:4.15.0-0.okd-2024-03-10-010116",
-        "version": "4.15.0-0.okd-2024-03-10-010116",
-        "default": false,
         "support_level": "production"
       }
     ]
@@ -76,43 +61,61 @@ spec:
   containers:
     - args:
         - run-postgresql
-      image: quay.io/sclorg/postgresql-12-c8s:latest
+      image: quay.io/sclorg/postgresql-15-c9s:latest
       name: db
+      resources:
+        requests:
+          memory: 100Mi
+          cpu: 100m
+        limits:
+          memory: 100Mi
+          cpu: 100m
       envFrom:
         - configMapRef:
             name: config
-      volumeMounts:
-        - mountPath: /var/lib/pgsql
-          name: pg-data
-    - image: quay.io/edge-infrastructure/assisted-installer-ui:latest-eb89faf736643adfb45ee74f8f340d613aa66103
+    - image: quay.io/edge-infrastructure/assisted-installer-ui:latest
       name: ui
       ports:
         - hostPort: 8080
+          containerPort: 8080
+      resources:
+        requests:
+          memory: 100Mi
+          cpu: 100m
+        limits:
+          memory: 100Mi
+          cpu: 100m
       envFrom:
         - configMapRef:
             name: config
-    - image: quay.io/edge-infrastructure/assisted-image-service:latest-2024-12-01
+    - image: quay.io/edge-infrastructure/assisted-image-service:latest
       name: image-service
       ports:
         - hostPort: 8888
+          containerPort: 8888
+      resources:
+        requests:
+          memory: 100Mi
+          cpu: 100m
+        limits:
+          memory: 100Mi
+          cpu: 100m
       envFrom:
         - configMapRef:
             name: config
-    - image: quay.io/edge-infrastructure/assisted-service:latest-2024-12-01
+    - image: quay.io/edge-infrastructure/assisted-service:latest
       name: service
       ports:
         - hostPort: 8090
+          containerPort: 8090
+      resources:
+        requests:
+          memory: 100Mi
+          cpu: 100m
+        limits:
+          memory: 100Mi
+          cpu: 100m
       envFrom:
         - configMapRef:
             name: config
-      volumeMounts:
-        - mountPath: /data
-          name: ai-data
   restartPolicy: Never
-  volumes:
-    - name: ai-data
-      persistentVolumeClaim:
-        claimName: ai-service-data
-    - name: pg-data
-      persistentVolumeClaim:
-        claimName: ai-db-data

@@ -4,7 +4,7 @@ compute:
   - name: worker
     replicas: 0
 controlPlane:
-  name: controller0
+  name: controller
   replicas: 1
 metadata:
   name: okd
