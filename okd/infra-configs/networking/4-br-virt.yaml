@@ -1,0 +1,35 @@
+apiVersion: nmstate.io/v1
+kind: NodeNetworkConfigurationPolicy
+metadata:
+  name: br-virt-policy
+spec:
+  desiredState:
+    interfaces:
+      - name: br-virt
+        description: Linux bridge for virtual machines direct accessibility
+        type: linux-bridge
+        state: up
+        ipv4:
+          enabled: true
+          dhcp: true
+        ipv6:
+          enabled: false
+        bridge:
+          port:
+            - name: eno3
+---
+apiVersion: "k8s.cni.cncf.io/v1"
+kind: NetworkAttachmentDefinition
+metadata:
+  name: bridge-network
+spec:
+  config: |
+    {
+      "cniVersion": "0.3.1",
+      "name": "bridge-network",
+      "type": "bridge",
+      "bridge": "br-virt",
+      "macspoofchk": true,
+      "disableContainerInterface": true,
+      "preserveDefaultVlan": false
+    }

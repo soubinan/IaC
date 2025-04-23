@@ -20,9 +20,10 @@ metadata:
 spec:
   addresses:
     - 192.168.110.1/26
-  serviceSelectors:
-    - matchLabels:
-        zone: paas
+  serviceAllocation:
+    serviceSelectors:
+      - matchLabels:
+          zone: paas
 ---
 apiVersion: metallb.io/v1beta1
 kind: IPAddressPool
