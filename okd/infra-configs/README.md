@@ -47,7 +47,7 @@ sdb    223.5G        disk DELLBOSS VD   351868f444010010
 sdc      3.3T        disk PERC H330 Adp 00f16c9522af51922f0086f557f098cd
 ```
 
-## Update Node Configs
+## Customize Node Configs
 
 ```sh {"interpreter":"/bin/bash"}
 # Increase Kubelet resources
@@ -56,7 +56,8 @@ oc apply -f machine-config/100-kubelet-config.yaml
 
 ```sh {"interpreter":"/bin/bash"}
 # Mount /var/lib/containers to a dedicated disk
-sed -i "s?source:.*?source: data:application/x-shellscript;base64,$(base64 machine-config/var-lib-containers.sh -w 0)?g" machine-config/100-master-var-lib-containers.yaml
+podman run --interactive --rm quay.io/coreos/butane:release --pretty \
+    --strict < machine-config/100-master-var-lib-containers.bu > machine-config/100-master-var-lib-containers.yaml
 oc apply -f machine-config/100-master-var-lib-containers.yaml
 ```
 
@@ -178,6 +179,49 @@ oc get clusteroperators kube-apiserver -w
 Do not continue to the next step until `PROGRESSING` is listed as `False`.
 
 [More info](https://docs.redhat.com/en/documentation/openshift_container_platform/4.14/html/security_and_compliance/configuring-certificates)
+
+## Setup Virtualization
+
+```sh {"interpreter":"/bin/bash"}
+oc apply -f virtualization/hyperconverged.yaml
+```
+
+## Setup for GPUs
+
+```sh {"interpreter":"/bin/bash"}
+oc apply -f gpus/ndf.yaml
+```
+
+```sh {"interpreter":"/bin/bash"}
+# Enable IOMMU
+podman run --interactive --rm quay.io/coreos/butane:release --pretty \
+    --strict < machine-config/100-master-iommu.bu > machine-config/100-master-iommu.yaml
+podman run --interactive --rm quay.io/coreos/butane:release --pretty \
+    --strict < machine-config/100-master-vfiopci.bu > machine-config/100-master-vfiopci.yaml
+
+oc apply -f machine-config/100-master-iommu.yaml
+oc apply -f machine-config/100-master-vfiopci.yaml
+```
+
+```sh {"interpreter":"/bin/bash"}
+# Annotate GPU nodes
+GPU_NODES=$(oc get node -l nvidia.com/gpu.present=true --no-headers | awk '{print $1}')
+
+for gpu_node in $GPU_NODES;
+do
+oc label node $gpu_node --overwrite nvidia.com/gpu.workload.config=vm-passthrough
+done
+
+# Patch HyperConverged for IOMMU
+oc apply -f virtualization/hyperconverged-add-gpu-setup.yaml
+
+# Apply GPU operator policy
+oc apply -f gpus/cluster-policy.yaml
+```
+
+[More info](https://docs.redhat.com/en/documentation/openshift_container_platform/4.18/html/virtualization/managing-vms#virt-configuring-pci-passthrough)
+
+[Download virtctl](https://docs.redhat.com/en/documentation/openshift_container_platform/4.18/html/virtualization/getting-started#installing-virtctl_virt-using-the-cli-tools)
 
 ## Setup ArgoCD
 
