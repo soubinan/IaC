@@ -219,6 +219,11 @@ oc apply -f virtualization/hyperconverged-add-gpu-setup.yaml
 oc apply -f gpus/cluster-policy.yaml
 ```
 
+```sh {"interpreter":"/bin/bash"}
+# Install virtctl
+curl -sL https://hyperconverged-cluster-cli-download-openshift-cnv.apps.okd.lab.soubilabs.xyz/amd64/linux/virtctl.tar.gz | sudo tar xvz -C /usr/local/bin/ virtctl
+```
+
 [More info](https://docs.redhat.com/en/documentation/openshift_container_platform/4.18/html/virtualization/managing-vms#virt-configuring-pci-passthrough)
 
 [Download virtctl](https://docs.redhat.com/en/documentation/openshift_container_platform/4.18/html/virtualization/getting-started#installing-virtctl_virt-using-the-cli-tools)
