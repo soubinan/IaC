@@ -1,0 +1,9 @@
+variant: openshift
+version: 4.18.0
+metadata:
+  labels:
+    machineconfiguration.openshift.io/role: master
+  name: 100-master-iommu
+openshift:
+  kernel_arguments:
+    - intel_iommu=on

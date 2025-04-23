@@ -11,11 +11,11 @@ spec:
       version: 3.4.0
     storage:
       files:
-        - path: /etc/create-filesystem
-          mode: 0755
-          contents:
-            # Created from the base64 encoded version of the script var-lib-containers.sh
-            source: data:application/x-shellscript;base64,IyEvYmluL2Jhc2gKCm1rZnMueGZzIC1MIHZhci1saWItY29udCAtZiAvZGV2L2Rpc2svYnktaWQvc2NzaS1TREVMTF9QRVJDX0gzMzBfQWRwXzAwNDI1ZTE2YTQ5ZTM4OTIyZjAwODZmNTU3ZjA5OGNkIHx8IGVjaG8gIlVuYWJsZSB0byBjcmVhdGUgZmlsZXN5c3RlbSwgcHJvYmFibHkgYWxyZWFkeSBleGlzdHMiCnVkZXZhZG0gc2V0dGxlCnRvdWNoIC9ldGMvdmFyLWxpYi1jb250YWluZXJzLW1vdW50CmV4aXQK
+        - contents:
+            compression: gzip
+            source: data:;base64,H4sIAAAAAAAC/0zOsU7DMBAA0N1fcZQVY9M0JRkRVGLIgEDM0dk+K1aduMpdokTqx7PyB+/xwbg0GYc8KDVeIz9vkUF3sOKsc3Lal0lARzCBVhMSX43bdQqGPSf983Hpuv7r8v3ef1aV7d/Crbf2dKzp5YynlqqmPR6jtc051vVrtG3jA9zvQH4ocPid0GUCKeBnQiGIKRPvLDQ+wW0uDl3eAfNMGHagLbHwQS2BVgwjMIlkUlIWP4Ah8eY/GdNEM+uxLJMo2pKovwAAAP//mObsouoAAAA=
+          mode: 493
+          path: /etc/create-filesystem
     systemd:
       units:
         - contents: |
