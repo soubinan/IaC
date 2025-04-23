@@ -1,0 +1,14 @@
+---
+apiVersion: hco.kubevirt.io/v1beta1
+kind: HyperConverged
+metadata:
+  name: kubevirt-hyperconverged
+  namespace: openshift-cnv
+spec:
+  # featureGates:
+  #   disableMDevConfiguration: true
+  permittedHostDevices:
+    pciHostDevices:
+      - pciDeviceSelector: 10DE:1B38
+        resourceName: nvidia.com/GP102GL_TESLA_P40
+        # externalResourceProvider: true
